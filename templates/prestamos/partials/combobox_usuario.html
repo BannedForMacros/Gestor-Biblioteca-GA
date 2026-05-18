@@ -1,0 +1,106 @@
+<div id="combobox-usuario"
+     x-data="comboboxUsuario()"
+     @click.outside="cerrar()"
+     @keydown.escape.window="cerrar()"
+     class="relative">
+
+  <label for="busqueda_usuario" class="block text-sm font-semibold text-slate-800 mb-2">
+    Código universitario o nombre
+  </label>
+
+  <div class="relative">
+    <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0v.75H4.5v-.75Z"/>
+      </svg>
+    </span>
+
+    <input type="text"
+           id="busqueda_usuario"
+           x-ref="input"
+           autocomplete="off"
+           spellcheck="false"
+           placeholder="Empiece a escribir el código o nombre…"
+           @focus="abrir()"
+           @click="abrir()"
+           @input="abrir(); cargar()"
+           @keydown.arrow-down.prevent="mover(1)"
+           @keydown.arrow-up.prevent="mover(-1)"
+           @keydown.enter.prevent="seleccionarActivo()"
+           class="input-busy w-full text-base pl-11 pr-10 py-3 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all placeholder:text-slate-400">
+
+    <button type="button"
+            x-show="$refs.input.value"
+            @click="$refs.input.value=''; cargar(); $refs.input.focus()"
+            class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-700 transition-colors"
+            aria-label="Limpiar búsqueda">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div x-show="open"
+       x-cloak
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0 -translate-y-1"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-100"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="dropdown-glass absolute z-30 mt-2 w-full rounded-xl border border-slate-200 shadow-2xl shadow-marca-900/10 overflow-hidden"
+       role="listbox">
+
+    <div id="usuario-opciones"
+         hx-get="{% url 'prestamos:opciones_usuario' %}"
+         hx-trigger="load, refrescar from:body"
+         hx-include="#busqueda_usuario"
+         class="max-h-96 overflow-y-auto">
+      <div class="p-6 space-y-3">
+        <div class="skeleton h-4 w-32 rounded"></div>
+        <div class="skeleton h-12 w-full rounded-lg"></div>
+        <div class="skeleton h-12 w-full rounded-lg"></div>
+      </div>
+    </div>
+
+    <footer class="bg-slate-50 px-4 py-2 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+      <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">↑↓</kbd> navegar</span>
+      <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">Enter</kbd> elegir</span>
+      <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">Esc</kbd> cerrar</span>
+    </footer>
+  </div>
+
+  <p class="text-xs text-slate-500 mt-2">
+    Escriba el código universitario, apellido o nombre. Si la persona no existe, regístrela primero desde el menú de inicio.
+  </p>
+</div>
+
+<script>
+  if (typeof window.comboboxUsuario === 'undefined') {
+    window.comboboxUsuario = function() {
+      return {
+        open: false,
+        indiceActivo: -1,
+        abrir() { this.open = true; },
+        cerrar() { this.open = false; this.indiceActivo = -1; },
+        cargar() {
+          this.indiceActivo = -1;
+          htmx.trigger('#usuario-opciones', 'refrescar');
+        },
+        opciones() {
+          return Array.from(document.querySelectorAll('#usuario-opciones [data-opcion-id]'));
+        },
+        mover(delta) {
+          const ops = this.opciones();
+          if (!ops.length) return;
+          this.indiceActivo = (this.indiceActivo + delta + ops.length) % ops.length;
+          ops.forEach((el, i) => el.dataset.active = (i === this.indiceActivo) ? 'true' : 'false');
+          ops[this.indiceActivo]?.scrollIntoView({block: 'nearest'});
+        },
+        seleccionarActivo() {
+          const ops = this.opciones();
+          const elegido = this.indiceActivo >= 0 ? ops[this.indiceActivo] : ops[0];
+          elegido?.click();
+        }
+      };
+    };
+  }
+</script>

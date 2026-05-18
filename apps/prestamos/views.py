@@ -3,10 +3,10 @@ from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from apps.catalogo.models import Ejemplar
 from apps.usuarios.models import UsuarioBiblioteca
@@ -21,36 +21,62 @@ def nuevo(request):
     })
 
 
+# ============================================================
+#  Combobox de ejemplares
+# ============================================================
+
 @login_required
-def buscar_ejemplar(request):
-    """HTMX: busca un ejemplar por código exacto o por título/autor."""
+@require_GET
+def opciones_ejemplar(request):
+    """HTMX: lista de opciones para el combobox.
+    Si q está vacío -> últimos 10 disponibles agregados.
+    Si q exacto match de código -> dispara autoselección.
+    Si q parcial -> filtra hasta 15 resultados.
+    """
     consulta = (request.GET.get("q") or "").strip()
+
     if not consulta:
-        return render(request, "prestamos/partials/ejemplar_vacio.html")
-
-    ejemplar = Ejemplar.objects.select_related("libro", "libro__categoria").filter(
-        codigo__iexact=consulta
-    ).first()
-    if ejemplar:
-        return _render_ejemplar(request, ejemplar)
-
-    qs = Ejemplar.objects.select_related("libro", "libro__categoria").filter(
-        Q(libro__titulo__icontains=consulta) | Q(libro__autor__icontains=consulta)
-        | Q(codigo__icontains=consulta)
-    )[:20]
-
-    if not qs.exists():
-        return render(request, "prestamos/partials/ejemplar_no_encontrado.html", {
-            "consulta": consulta,
+        ejemplares = Ejemplar.objects.select_related(
+            "libro", "libro__categoria"
+        ).filter(estado=Ejemplar.Estado.DISPONIBLE).order_by("-creado_en")[:10]
+        return render(request, "prestamos/partials/combobox_opciones_ejemplar.html", {
+            "ejemplares": ejemplares,
+            "consulta": "",
+            "es_default": True,
         })
 
-    return render(request, "prestamos/partials/ejemplar_sugerencias.html", {
-        "ejemplares": qs,
+    match_exacto = Ejemplar.objects.select_related(
+        "libro", "libro__categoria"
+    ).filter(codigo__iexact=consulta).first()
+    if match_exacto:
+        return render(request, "prestamos/partials/combobox_autoseleccion_ejemplar.html", {
+            "ejemplar_id": match_exacto.id,
+        })
+
+    ejemplares = Ejemplar.objects.select_related(
+        "libro", "libro__categoria"
+    ).filter(
+        Q(codigo__icontains=consulta)
+        | Q(libro__titulo__icontains=consulta)
+        | Q(libro__autor__icontains=consulta)
+    )[:15]
+
+    return render(request, "prestamos/partials/combobox_opciones_ejemplar.html", {
+        "ejemplares": ejemplares,
         "consulta": consulta,
+        "es_default": False,
     })
 
 
-def _render_ejemplar(request, ejemplar):
+@login_required
+@require_GET
+def seleccionar_ejemplar(request):
+    """HTMX: el usuario eligió un ejemplar. Devuelve la tarjeta de seleccionado."""
+    ejemplar_id = request.GET.get("id")
+    ejemplar = get_object_or_404(
+        Ejemplar.objects.select_related("libro", "libro__categoria"),
+        pk=ejemplar_id,
+    )
     prestamo_activo = None
     if ejemplar.estado == Ejemplar.Estado.PRESTADO:
         prestamo_activo = ejemplar.prestamos.filter(
@@ -65,42 +91,78 @@ def _render_ejemplar(request, ejemplar):
 
 
 @login_required
-def buscar_usuario(request):
-    """HTMX: busca un usuario por código universitario o nombre."""
-    consulta = (request.GET.get("q") or "").strip()
-    if not consulta:
-        return render(request, "prestamos/partials/usuario_vacio.html")
+@require_GET
+def reset_ejemplar(request):
+    """HTMX: el usuario quitó el ejemplar seleccionado, regresa el combobox vacío."""
+    return render(request, "prestamos/partials/combobox_ejemplar.html")
 
-    usuario = UsuarioBiblioteca.objects.filter(
+
+# ============================================================
+#  Combobox de usuarios
+# ============================================================
+
+@login_required
+@require_GET
+def opciones_usuario(request):
+    """HTMX: lista de opciones para el combobox de usuario."""
+    consulta = (request.GET.get("q") or "").strip()
+
+    if not consulta:
+        usuarios = UsuarioBiblioteca.objects.filter(activo=True).order_by("-creado_en")[:10]
+        return render(request, "prestamos/partials/combobox_opciones_usuario.html", {
+            "usuarios": usuarios,
+            "consulta": "",
+            "es_default": True,
+        })
+
+    match_exacto = UsuarioBiblioteca.objects.filter(
         codigo_universitario__iexact=consulta
     ).first()
-    if usuario:
-        return render(request, "prestamos/partials/usuario_seleccionado.html", {
-            "usuario": usuario,
-            "puede_pedir": usuario.activo,
+    if match_exacto:
+        return render(request, "prestamos/partials/combobox_autoseleccion_usuario.html", {
+            "usuario_id": match_exacto.id,
         })
 
-    qs = UsuarioBiblioteca.objects.filter(
-        Q(nombres__icontains=consulta)
+    usuarios = UsuarioBiblioteca.objects.filter(
+        Q(codigo_universitario__icontains=consulta)
+        | Q(nombres__icontains=consulta)
         | Q(apellidos__icontains=consulta)
-        | Q(codigo_universitario__icontains=consulta)
     )[:15]
 
-    if not qs.exists():
-        return render(request, "prestamos/partials/usuario_no_encontrado.html", {
-            "consulta": consulta,
-        })
-
-    return render(request, "prestamos/partials/usuario_sugerencias.html", {
-        "usuarios": qs,
+    return render(request, "prestamos/partials/combobox_opciones_usuario.html", {
+        "usuarios": usuarios,
         "consulta": consulta,
+        "es_default": False,
     })
 
 
 @login_required
+@require_GET
+def seleccionar_usuario(request):
+    """HTMX: el usuario eligió a una persona."""
+    usuario_id = request.GET.get("id")
+    usuario = get_object_or_404(UsuarioBiblioteca, pk=usuario_id)
+    return render(request, "prestamos/partials/usuario_seleccionado.html", {
+        "usuario": usuario,
+        "puede_pedir": usuario.activo,
+    })
+
+
+@login_required
+@require_GET
+def reset_usuario(request):
+    """HTMX: el usuario quitó el usuario seleccionado."""
+    return render(request, "prestamos/partials/combobox_usuario.html")
+
+
+# ============================================================
+#  Confirmación y recibo
+# ============================================================
+
+@login_required
 @require_POST
 def confirmar(request):
-    """Crea el préstamo. Espera ejemplar_id, usuario_id, fecha_devolucion, observaciones."""
+    """Crea el préstamo."""
     ejemplar_id = request.POST.get("ejemplar_id")
     usuario_id = request.POST.get("usuario_id")
     fecha_devolucion = request.POST.get("fecha_devolucion")
@@ -153,7 +215,6 @@ def confirmar(request):
 
 @login_required
 def recibo(request, prestamo_id):
-    """Recibo de un préstamo recién creado o consultado."""
     prestamo = get_object_or_404(
         Prestamo.objects.select_related(
             "ejemplar", "ejemplar__libro", "ejemplar__libro__categoria", "usuario"

@@ -1,0 +1,14 @@
+<div hx-get="{% url 'prestamos:seleccionar_ejemplar' %}?id={{ ejemplar_id }}"
+     hx-target="#combobox-ejemplar"
+     hx-swap="outerHTML"
+     hx-trigger="load">
+  <div class="px-6 py-8 text-center">
+    <div class="inline-flex items-center gap-2 text-marca-600 text-sm font-semibold">
+      <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+        <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      Coincidencia exacta, abriendo libro…
+    </div>
+  </div>
+</div>

@@ -47,30 +47,76 @@
       }
     </script>
 
-    <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
 
     <style>
       html { scroll-behavior: smooth; }
-      body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        font-feature-settings: 'cv11', 'ss01';
+      }
+      [x-cloak] { display: none !important; }
 
       @keyframes fadeUp {
         from { opacity: 0; transform: translateY(8px); }
         to   { opacity: 1; transform: translateY(0); }
       }
-      .anim-entrada { animation: fadeUp 350ms ease-out both; }
-      .anim-entrada-1 { animation: fadeUp 400ms ease-out 60ms both; }
-      .anim-entrada-2 { animation: fadeUp 400ms ease-out 120ms both; }
-      .anim-entrada-3 { animation: fadeUp 400ms ease-out 180ms both; }
-      .anim-entrada-4 { animation: fadeUp 400ms ease-out 240ms both; }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      @keyframes shimmer {
+        0%   { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+      }
+      .anim-entrada    { animation: fadeUp 350ms ease-out both; }
+      .anim-entrada-1  { animation: fadeUp 400ms ease-out 60ms both; }
+      .anim-entrada-2  { animation: fadeUp 400ms ease-out 120ms both; }
+      .anim-entrada-3  { animation: fadeUp 400ms ease-out 180ms both; }
+      .anim-entrada-4  { animation: fadeUp 400ms ease-out 240ms both; }
+      .anim-fade       { animation: fadeIn 200ms ease-out both; }
 
       *:focus-visible {
-        outline: 3px solid #10B981;
+        outline: 2px solid #10B981;
         outline-offset: 2px;
-        border-radius: 4px;
+        border-radius: 6px;
       }
 
-      .card-hover { transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }
-      .card-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -10px rgba(91, 45, 142, 0.25); }
+      .card-hover {
+        transition: transform 250ms cubic-bezier(.2,.8,.2,1), box-shadow 250ms ease, border-color 250ms ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px -10px rgba(91, 45, 142, 0.25);
+      }
+
+      /* Combobox dropdown polish */
+      .dropdown-glass {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+        background-size: 1000px 100%;
+        animation: shimmer 1.6s linear infinite;
+      }
+
+      /* HTMX subtle loading indicator on inputs */
+      .htmx-request.input-busy {
+        background-image: linear-gradient(90deg, transparent 0%, rgba(91,45,142,0.06) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s linear infinite;
+      }
+      .htmx-indicator { opacity: 0; transition: opacity 200ms ease; }
+      .htmx-request .htmx-indicator,
+      .htmx-request.htmx-indicator { opacity: 1; }
+
+      /* Combobox option keyboard highlight */
+      .option-row[data-active="true"] { background: #F5F0FB; }
+      .option-row:hover { background: #F5F0FB; }
     </style>
 
     {% block extra_head %}{% endblock %}
