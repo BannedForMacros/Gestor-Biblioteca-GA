@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}{% if es_edicion %}Editar libro{% else %}Nuevo libro{% endif %} · Gestor Biblioteca{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+
+  <header class="anim-entrada mb-7">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="{% url 'home' %}" class="hover:text-marca-700 transition-colors">Inicio</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <a href="{% url 'catalogo:libros_lista' %}" class="hover:text-marca-700 transition-colors">Libros</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <span class="text-slate-700 font-medium">{% if es_edicion %}Editar{% else %}Nuevo{% endif %}</span>
+    </nav>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+      {% if es_edicion %}Editar libro{% else %}Nuevo libro{% endif %}
+    </h1>
+    <p class="text-sm text-slate-500 mt-1">
+      {% if es_edicion %}Actualice los datos del título.{% else %}Registre un nuevo título en el catálogo.{% endif %}
+    </p>
+  </header>
+
+  <form method="post" class="anim-entrada-1 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="px-6 pt-5">
+        <div class="bg-red-50 border border-red-200 text-red-900 rounded-xl px-4 py-3 text-sm">
+          {{ form.non_field_errors }}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="p-6 sm:p-8 space-y-6">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="sm:col-span-2">
+          <label for="{{ form.titulo.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">
+            Título <span class="text-red-500">*</span>
+          </label>
+          {{ form.titulo }}
+          {% for e in form.titulo.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div>
+          <label for="{{ form.autor.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">Autor</label>
+          {{ form.autor }}
+          {% for e in form.autor.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div>
+          <label for="{{ form.categoria.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">
+            Categoría / Escuela <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            {{ form.categoria }}
+            <svg class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+          </div>
+          {% for e in form.categoria.errors %}<p class="text-xs text-red-600 mt-1">{{ e }}</p>{% endfor %}
+        </div>
+
+        <div>
+          <label for="{{ form.editorial.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">Editorial</label>
+          {{ form.editorial }}
+        </div>
+
+        <div>
+          <label for="{{ form.anio.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">Año</label>
+          {{ form.anio }}
+        </div>
+
+        <div>
+          <label for="{{ form.isbn.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">ISBN</label>
+          {{ form.isbn }}
+        </div>
+
+        <div>
+          <label for="{{ form.numero_paginas.id_for_label }}" class="block text-sm font-semibold text-slate-800 mb-1.5">N° de páginas</label>
+          {{ form.numero_paginas }}
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="px-6 sm:px-8 py-4 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between gap-3">
+      <a href="{% if es_edicion %}{% url 'catalogo:libro_detalle' libro.id %}{% else %}{% url 'catalogo:libros_lista' %}{% endif %}"
+         class="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors">
+        Cancelar
+      </a>
+      <button type="submit"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-marca-600 to-marca-700 text-white text-sm font-semibold hover:from-marca-700 hover:to-marca-800 shadow-md hover:shadow-lg hover:shadow-marca-500/30 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+        {% if es_edicion %}Guardar cambios{% else %}Crear libro{% endif %}
+      </button>
+    </footer>
+  </form>
+
+</div>
+{% endblock %}

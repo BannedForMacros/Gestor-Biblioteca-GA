@@ -1,0 +1,32 @@
+{% comment %}
+Cabecera reutilizable para páginas CRUD.
+Variables esperadas:
+  - breadcrumbs: lista de dicts {label, url?}
+  - title
+  - subtitle (opcional)
+  - actions (bloque inline o html)
+{% endcomment %}
+<header class="anim-entrada mb-7">
+  {% if breadcrumbs %}
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-3" aria-label="Migas">
+      {% for crumb in breadcrumbs %}
+        {% if not forloop.first %}
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        {% endif %}
+        {% if crumb.url and not forloop.last %}
+          <a href="{{ crumb.url }}" class="hover:text-marca-700 transition-colors">{{ crumb.label }}</a>
+        {% else %}
+          <span class="text-slate-700 font-medium">{{ crumb.label }}</span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  {% endif %}
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div class="min-w-0">
+      {% if eyebrow %}<p class="text-sm font-semibold text-marca-600 uppercase tracking-wider mb-1">{{ eyebrow }}</p>{% endif %}
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{{ title }}</h1>
+      {% if subtitle %}<p class="text-sm text-slate-500 mt-1">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if actions %}<div class="flex items-center gap-2">{{ actions|safe }}</div>{% endif %}
+  </div>
+</header>
