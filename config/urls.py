@@ -13,6 +13,8 @@ urlpatterns = [
     path('', dashboard, name='home'),
     path('importar/', include('apps.importacion.urls')),
     path('prestamos/', include('apps.prestamos.urls')),
+    path('catalogo/', include('apps.catalogo.urls')),
+    path('personas/', include('apps.usuarios.urls')),
     path('admin/', admin.site.urls),
 ]
 
