@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Personas · Gestor Biblioteca{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+  <header class="anim-entrada mb-7">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="{% url 'home' %}" class="hover:text-marca-700 transition-colors">Inicio</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <span class="text-slate-700 font-medium">Personas</span>
+    </nav>
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold text-marca-600 uppercase tracking-wider mb-1">Directorio</p>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Personas</h1>
+        <p class="text-sm text-slate-500 mt-1">
+          <span class="font-semibold text-slate-700 tabular-nums">{{ total }}</span> persona{{ total|pluralize }} registrada{{ total|pluralize }}
+        </p>
+      </div>
+      <a href="{% url 'usuarios:persona_nueva' %}"
+         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-marca-600 to-marca-700 text-white text-sm font-semibold hover:from-marca-700 hover:to-marca-800 shadow-md hover:shadow-lg hover:shadow-marca-500/30 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/></svg>
+        Registrar persona
+      </a>
+    </div>
+  </header>
+
+  <form method="get" class="anim-entrada-1 bg-white rounded-2xl border border-slate-200 p-4 mb-5 grid grid-cols-1 md:grid-cols-12 gap-3">
+    <div class="md:col-span-6 relative">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.3-4.3M10 17a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>
+      <input type="text" name="q" value="{{ q }}"
+             placeholder="Buscar por código, nombre o correo…"
+             class="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all text-sm">
+    </div>
+    <div class="md:col-span-2 relative">
+      <select name="tipo" class="w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all text-sm">
+        <option value="">Todos</option>
+        {% for val, label in tipos %}
+          <option value="{{ val }}" {% if tipo == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <svg class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+    </div>
+    <div class="md:col-span-2 relative">
+      <select name="activo" class="w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all text-sm">
+        <option value="">Todos</option>
+        <option value="1" {% if activo == "1" %}selected{% endif %}>Activos</option>
+        <option value="0" {% if activo == "0" %}selected{% endif %}>Inactivos</option>
+      </select>
+      <svg class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+    </div>
+    <button type="submit"
+            class="md:col-span-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors">
+      Filtrar
+    </button>
+  </form>
+
+  <section class="anim-entrada-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    {% if page.object_list %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50/70 border-b border-slate-100">
+              <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Persona</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Código</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Escuela</th>
+              <th class="text-center px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Préstamos</th>
+              <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</th>
+              <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for p in page.object_list %}
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <td class="px-6 py-3.5">
+                  <a href="{% url 'usuarios:persona_detalle' p.id %}" class="flex items-center gap-3 group">
+                    <span class="w-9 h-9 rounded-full bg-gradient-to-br from-marca-100 to-marca-200 text-marca-800 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      {{ p.nombres|slice:":1" }}{{ p.apellidos|slice:":1" }}
+                    </span>
+                    <div class="min-w-0">
+                      <p class="font-semibold text-slate-900 group-hover:text-marca-700 transition-colors line-clamp-1">{{ p.apellidos }}, {{ p.nombres }}</p>
+                      {% if p.correo %}<p class="text-xs text-slate-400 line-clamp-1">{{ p.correo }}</p>{% endif %}
+                    </div>
+                  </a>
+                </td>
+                <td class="px-6 py-3.5 font-mono text-slate-700">{{ p.codigo_universitario }}</td>
+                <td class="px-6 py-3.5">
+                  {% if p.tipo == 'DOCENTE' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-marca-50 text-marca-700 text-xs font-semibold">Docente</span>
+                  {% elif p.tipo == 'ADMIN' %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold">Admin.</span>
+                  {% else %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">Estudiante</span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-3.5 text-slate-700">{{ p.escuela|default:"—" }}</td>
+                <td class="px-6 py-3.5 text-center font-mono tabular-nums text-slate-900 font-semibold">{{ p.n_prestamos }}</td>
+                <td class="px-6 py-3.5">
+                  {% if p.activo %}
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-acento-50 text-acento-700 text-xs font-semibold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-acento-500"></span>Activo
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Inactivo
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-3.5 text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <a href="{% url 'usuarios:persona_detalle' p.id %}"
+                       class="p-1.5 rounded-md text-slate-500 hover:text-marca-700 hover:bg-marca-50 transition-colors" title="Ver">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                    </a>
+                    <a href="{% url 'usuarios:persona_editar' p.id %}"
+                       class="p-1.5 rounded-md text-slate-500 hover:text-marca-700 hover:bg-marca-50 transition-colors" title="Editar">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-100">
+        {% include "_partials/pagination.html" with page=page querystring="q="|add:q|add:"&tipo="|add:tipo|add:"&activo="|add:activo %}
+      </div>
+    {% else %}
+      <div class="px-6 py-16 text-center">
+        <div class="mx-auto w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mb-4">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+        </div>
+        <p class="text-sm font-semibold text-slate-700">
+          {% if q or tipo or activo %}Sin coincidencias{% else %}Aún no hay personas registradas{% endif %}
+        </p>
+        <p class="text-xs text-slate-500 mt-1 mb-4">Registre estudiantes, docentes o administrativos para empezar a prestar.</p>
+        <a href="{% url 'usuarios:persona_nueva' %}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-marca-600 text-white text-sm font-semibold hover:bg-marca-700 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Registrar persona
+        </a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

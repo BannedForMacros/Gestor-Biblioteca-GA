@@ -4,7 +4,9 @@ from . import views
 app_name = "prestamos"
 
 urlpatterns = [
+    path("", views.prestamos_lista, name="lista"),
     path("nuevo/", views.nuevo, name="nuevo"),
+    path("<int:prestamo_id>/devolver/", views.devolver, name="devolver"),
 
     # Combobox de ejemplar
     path("ej/opciones/", views.opciones_ejemplar, name="opciones_ejemplar"),

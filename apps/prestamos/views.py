@@ -1,6 +1,8 @@
 from datetime import timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponseBadRequest, HttpResponse
@@ -11,6 +13,82 @@ from django.views.decorators.http import require_POST, require_GET
 from apps.catalogo.models import Ejemplar
 from apps.usuarios.models import UsuarioBiblioteca
 from .models import Prestamo
+
+
+@login_required
+def prestamos_lista(request):
+    q = (request.GET.get("q") or "").strip()
+    estado = request.GET.get("estado") or "ACTIVO"
+    hoy = timezone.now().date()
+
+    prestamos = (
+        Prestamo.objects.select_related(
+            "ejemplar__libro", "ejemplar__libro__categoria", "usuario", "registrado_por"
+        ).order_by("-fecha_prestamo")
+    )
+
+    if estado == "VENCIDO":
+        prestamos = prestamos.filter(estado=Prestamo.Estado.ACTIVO, fecha_devolucion_esperada__lt=hoy)
+    elif estado in {"ACTIVO", "DEVUELTO"}:
+        prestamos = prestamos.filter(estado=estado)
+    # estado "" -> todos
+
+    if q:
+        prestamos = prestamos.filter(
+            Q(ejemplar__codigo__icontains=q)
+            | Q(ejemplar__libro__titulo__icontains=q)
+            | Q(usuario__nombres__icontains=q)
+            | Q(usuario__apellidos__icontains=q)
+            | Q(usuario__codigo_universitario__icontains=q)
+        )
+
+    paginator = Paginator(prestamos, 20)
+    page = paginator.get_page(request.GET.get("page"))
+
+    # Stats para los chips
+    stats = {
+        "activos": Prestamo.objects.filter(estado=Prestamo.Estado.ACTIVO).count(),
+        "vencidos": Prestamo.objects.filter(
+            estado=Prestamo.Estado.ACTIVO, fecha_devolucion_esperada__lt=hoy
+        ).count(),
+        "devueltos": Prestamo.objects.filter(estado=Prestamo.Estado.DEVUELTO).count(),
+        "total": Prestamo.objects.count(),
+    }
+
+    return render(request, "prestamos/lista.html", {
+        "page": page,
+        "q": q,
+        "estado": estado,
+        "stats": stats,
+        "hoy": hoy,
+    })
+
+
+@login_required
+@require_POST
+def devolver(request, prestamo_id):
+    prestamo = get_object_or_404(
+        Prestamo.objects.select_related("ejemplar"), pk=prestamo_id
+    )
+    if prestamo.estado != Prestamo.Estado.ACTIVO:
+        messages.error(request, "Este préstamo ya no está activo.")
+        return redirect("prestamos:lista")
+
+    with transaction.atomic():
+        prestamo.estado = Prestamo.Estado.DEVUELTO
+        prestamo.fecha_devolucion_real = timezone.now()
+        prestamo.save(update_fields=["estado", "fecha_devolucion_real"])
+        prestamo.ejemplar.estado = Ejemplar.Estado.DISPONIBLE
+        prestamo.ejemplar.save(update_fields=["estado"])
+
+    messages.success(
+        request,
+        f"Devolución registrada: «{prestamo.ejemplar.libro.titulo}» de {prestamo.usuario.nombre_completo}.",
+    )
+    next_url = request.POST.get("next") or "prestamos:lista"
+    if next_url.startswith("/"):
+        return redirect(next_url)
+    return redirect(next_url)
 
 
 @login_required
