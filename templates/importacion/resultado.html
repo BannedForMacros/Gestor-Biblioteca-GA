@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Importación completada · Gestor Biblioteca{% endblock %}
+
+{% block content %}
+
+<section class="bg-gradient-to-br from-acento-600 to-acento-700 text-white">
+  <div class="max-w-5xl mx-auto px-6 py-12">
+    <nav class="anim-entrada flex items-center gap-2 text-acento-100 text-sm mb-4">
+      <a href="{% url 'home' %}" class="hover:text-white transition-colors">Inicio</a>
+      <span aria-hidden="true">›</span>
+      <a href="{% url 'importacion:subir' %}" class="hover:text-white transition-colors">Importar libros</a>
+      <span aria-hidden="true">›</span>
+      <span class="text-white font-medium">Resultado</span>
+    </nav>
+    <div class="anim-entrada-1 flex items-start gap-4">
+      <div class="flex-shrink-0 w-14 h-14 rounded-full bg-white text-acento-700 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-2">Importación completada</h1>
+        <p class="text-lg text-acento-50">
+          Archivo: <strong class="text-white">{{ r.archivo_nombre }}</strong>
+          · Escuela: <strong class="text-white">{{ r.categoria_nombre }}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-5xl mx-auto px-6 -mt-8 pb-16">
+
+  <div class="anim-entrada-1 grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+    <article class="bg-white rounded-2xl shadow-md border-2 border-acento-200 p-5">
+      <p class="text-xs uppercase tracking-wider font-bold text-acento-700 mb-1">Libros nuevos</p>
+      <p class="text-4xl font-extrabold text-slate-900">{{ r.libros_creados }}</p>
+      <p class="text-sm text-slate-500 mt-1">títulos agregados al catálogo</p>
+    </article>
+
+    <article class="bg-white rounded-2xl shadow-md border-2 border-acento-200 p-5">
+      <p class="text-xs uppercase tracking-wider font-bold text-acento-700 mb-1">Ejemplares nuevos</p>
+      <p class="text-4xl font-extrabold text-slate-900">{{ r.ejemplares_creados }}</p>
+      <p class="text-sm text-slate-500 mt-1">copias físicas registradas</p>
+    </article>
+
+    <article class="bg-white rounded-2xl shadow-md border-2 border-slate-200 p-5">
+      <p class="text-xs uppercase tracking-wider font-bold text-slate-600 mb-1">Capítulos</p>
+      <p class="text-4xl font-extrabold text-slate-900">{{ r.capitulos_creados }}</p>
+      <p class="text-sm text-slate-500 mt-1">contenidos de libros</p>
+    </article>
+
+    <article class="bg-white rounded-2xl shadow-md border-2 border-slate-200 p-5">
+      <p class="text-xs uppercase tracking-wider font-bold text-slate-600 mb-1">Ya existían</p>
+      <p class="text-4xl font-extrabold text-slate-900">
+        {{ r.libros_existentes|add:r.ejemplares_existentes }}
+      </p>
+      <p class="text-sm text-slate-500 mt-1">no se duplicaron</p>
+    </article>
+
+  </div>
+
+  <div class="anim-entrada-2 bg-white rounded-2xl shadow-md border-2 border-slate-200 p-6 mb-6">
+    <h2 class="font-bold text-slate-900 text-lg mb-4">Detalle completo de la carga</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+      <div class="flex justify-between border-b border-slate-100 pb-2">
+        <dt class="text-slate-600">Libros nuevos creados</dt>
+        <dd class="font-semibold text-acento-700">{{ r.libros_creados }}</dd>
+      </div>
+      <div class="flex justify-between border-b border-slate-100 pb-2">
+        <dt class="text-slate-600">Libros que ya estaban registrados</dt>
+        <dd class="font-semibold text-slate-700">{{ r.libros_existentes }}</dd>
+      </div>
+      <div class="flex justify-between border-b border-slate-100 pb-2">
+        <dt class="text-slate-600">Ejemplares nuevos</dt>
+        <dd class="font-semibold text-acento-700">{{ r.ejemplares_creados }}</dd>
+      </div>
+      <div class="flex justify-between border-b border-slate-100 pb-2">
+        <dt class="text-slate-600">Ejemplares ya registrados</dt>
+        <dd class="font-semibold text-slate-700">{{ r.ejemplares_existentes }}</dd>
+      </div>
+      <div class="flex justify-between border-b border-slate-100 pb-2">
+        <dt class="text-slate-600">Capítulos creados</dt>
+        <dd class="font-semibold text-slate-700">{{ r.capitulos_creados }}</dd>
+      </div>
+      <div class="flex justify-between border-b border-slate-100 pb-2">
+        <dt class="text-slate-600">Filas omitidas (vacías)</dt>
+        <dd class="font-semibold text-slate-700">{{ r.filas_omitidas }}</dd>
+      </div>
+    </dl>
+  </div>
+
+  {% if r.advertencias %}
+    <div class="anim-entrada-3 bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 mb-6">
+      <h2 class="font-bold text-amber-900 text-lg mb-2 flex items-center gap-2">
+        <span class="inline-flex w-7 h-7 rounded-full bg-amber-600 text-white items-center justify-center text-sm font-bold">!</span>
+        Se encontraron {{ r.advertencias|length }} situaciones a revisar
+      </h2>
+      <p class="text-amber-800 text-sm mb-4">
+        Esto no impide que la importación se haya realizado.
+        Son filas con datos inusuales que conviene revisar manualmente.
+      </p>
+      <details class="bg-white rounded-lg border border-amber-200 overflow-hidden">
+        <summary class="px-4 py-3 cursor-pointer font-semibold text-amber-900 hover:bg-amber-50 transition-colors">
+          Ver detalle de advertencias
+        </summary>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-amber-50 text-amber-900">
+              <tr>
+                <th class="px-4 py-2 text-left font-semibold w-24">Fila Excel</th>
+                <th class="px-4 py-2 text-left font-semibold">Mensaje</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in r.advertencias %}
+                <tr class="border-t border-slate-100">
+                  <td class="px-4 py-2 text-slate-700 font-mono">{{ a.fila }}</td>
+                  <td class="px-4 py-2 text-slate-700">{{ a.mensaje }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  {% else %}
+    <div class="anim-entrada-3 bg-acento-50 border-l-4 border-acento-600 rounded-r-xl p-5 mb-6">
+      <h3 class="font-bold text-acento-700 mb-1">Sin advertencias</h3>
+      <p class="text-slate-700 text-sm">El archivo se cargó sin observaciones. Todo en orden.</p>
+    </div>
+  {% endif %}
+
+  <div class="anim-entrada-4 flex flex-col sm:flex-row gap-3 sm:justify-between items-stretch sm:items-center">
+    <a href="{% url 'home' %}"
+       class="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition-colors">
+      ← Volver al inicio
+    </a>
+    <a href="{% url 'importacion:subir' %}"
+       class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-marca-600 text-white font-bold hover:bg-marca-700 transition-colors shadow-md">
+      Importar otro archivo →
+    </a>
+  </div>
+
+</section>
+
+{% endblock %}
