@@ -135,7 +135,7 @@
 
     <article class="anim-entrada-4 card-hover bg-white rounded-2xl border-2 border-slate-200 overflow-hidden">
       <div class="bg-slate-100 px-6 py-4 border-b-2 border-slate-200 flex items-center gap-3">
-        <span class="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center text-sm font-bold">📊</span>
+        <span class="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center text-sm font-bold">R</span>
         <h3 class="font-bold text-slate-800">Reportes</h3>
       </div>
       <div class="p-6">
@@ -150,6 +150,29 @@
       </div>
     </article>
 
+  </div>
+
+  <div class="anim-entrada-4 mt-10 bg-white rounded-2xl border-2 border-marca-200 shadow-sm overflow-hidden">
+    <div class="bg-marca-50 px-6 py-4 border-b-2 border-marca-100 flex items-center gap-3">
+      <span class="w-9 h-9 rounded-full bg-marca-700 text-white flex items-center justify-center font-bold">⚙</span>
+      <h3 class="font-bold text-marca-900 text-lg">Configuración inicial (solo la primera vez)</h3>
+    </div>
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+      <div>
+        <h4 class="font-semibold text-slate-900 mb-2">Importar libros desde Excel</h4>
+        <p class="text-slate-700 leading-relaxed text-sm">
+          Si aún no ha cargado los libros de las 4 escuelas (Economía, Administración,
+          Contabilidad y Comercio), comience aquí. Suba los archivos Excel uno a uno
+          y el sistema poblará automáticamente el catálogo.
+        </p>
+      </div>
+      <div class="flex md:justify-end">
+        <a href="{% url 'importacion:subir' %}"
+           class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-marca-700 text-white font-bold hover:bg-marca-800 transition-colors shadow">
+          Ir a importación de Excel →
+        </a>
+      </div>
+    </div>
   </div>
 
   <div class="anim-entrada-4 mt-10 bg-marca-50 border-l-4 border-marca-600 rounded-r-xl p-5 sm:p-6">
