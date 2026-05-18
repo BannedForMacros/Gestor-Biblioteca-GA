@@ -61,6 +61,22 @@
 
 <script>
   document.getElementById('usuario_id_input').value = '{% if puede_pedir %}{{ usuario.id }}{% endif %}';
+
+  // Actualizar panel de resumen
+  const resPersona = document.getElementById('resumen-persona');
+  if (resPersona) {
+    {% if puede_pedir %}
+      resPersona.innerHTML = `
+        <p class="text-sm font-bold text-slate-900 leading-snug">{{ usuario.apellidos|escapejs }}, {{ usuario.nombres|escapejs }}</p>
+        <p class="text-xs text-slate-500 mt-0.5">{{ usuario.get_tipo_display|escapejs }}{% if usuario.escuela %} · {{ usuario.escuela|escapejs }}{% endif %}</p>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="font-mono text-xs text-slate-700">{{ usuario.codigo_universitario|escapejs }}</span>
+        </div>`;
+    {% else %}
+      resPersona.innerHTML = `<p class="text-sm text-red-700 font-semibold">Persona inactiva — no puede recibir préstamos</p>`;
+    {% endif %}
+  }
+
   document.body.dispatchEvent(new Event('change'));
   {% if puede_pedir %}
     setTimeout(function() {

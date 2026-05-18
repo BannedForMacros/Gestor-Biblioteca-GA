@@ -1,12 +1,15 @@
 <div id="combobox-ejemplar"
      x-data="comboboxEjemplar()"
-     @click.outside="cerrar()"
      @keydown.escape.window="cerrar()"
      class="relative">
-
-  <label for="busqueda_ejemplar" class="block text-sm font-semibold text-slate-800 mb-2">
-    Código del libro, título o autor
-  </label>
+<script>
+  (function(){
+    const inp = document.getElementById('ejemplar_id_input'); if (inp) inp.value = '';
+    const r = document.getElementById('resumen-libro');
+    if (r) r.innerHTML = '<p class="text-sm text-slate-400 italic">Aún no seleccionado</p>';
+    document.body.dispatchEvent(new Event('change'));
+  })();
+</script>
 
   <div class="relative">
     <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
@@ -27,51 +30,55 @@
            @keydown.arrow-down.prevent="mover(1)"
            @keydown.arrow-up.prevent="mover(-1)"
            @keydown.enter.prevent="seleccionarActivo()"
-           class="input-busy w-full text-base pl-11 pr-10 py-3 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all placeholder:text-slate-400">
+           class="w-full text-base pl-11 pr-10 py-3 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all placeholder:text-slate-400">
 
     <button type="button"
             x-show="$refs.input.value"
-            @click="$refs.input.value=''; cargar(); $refs.input.focus()"
+            @click.stop="$refs.input.value=''; cargar(); $refs.input.focus()"
             class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-700 transition-colors"
             aria-label="Limpiar búsqueda">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
     </button>
   </div>
 
-  <div x-show="open"
-       x-cloak
-       x-transition:enter="transition ease-out duration-150"
-       x-transition:enter-start="opacity-0 -translate-y-1"
-       x-transition:enter-end="opacity-100 translate-y-0"
-       x-transition:leave="transition ease-in duration-100"
-       x-transition:leave-start="opacity-100"
-       x-transition:leave-end="opacity-0"
-       class="dropdown-glass absolute z-30 mt-2 w-full rounded-xl border border-slate-200 shadow-2xl shadow-marca-900/10 overflow-hidden"
-       role="listbox">
-
-    <div id="ejemplar-opciones"
-         hx-get="{% url 'prestamos:opciones_ejemplar' %}"
-         hx-trigger="load, refrescar from:body"
-         hx-include="#busqueda_ejemplar"
-         class="max-h-96 overflow-y-auto">
-      <div class="p-6 space-y-3">
-        <div class="skeleton h-4 w-32 rounded"></div>
-        <div class="skeleton h-12 w-full rounded-lg"></div>
-        <div class="skeleton h-12 w-full rounded-lg"></div>
-      </div>
-    </div>
-
-    <footer class="bg-slate-50 px-4 py-2 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
-      <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">↑↓</kbd> navegar</span>
-      <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">Enter</kbd> elegir</span>
-      <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">Esc</kbd> cerrar</span>
-    </footer>
-  </div>
-
   <p class="text-xs text-slate-500 mt-2">
-    <strong>Con lector de barras:</strong> apunte y dispare — el código aparece y se selecciona solo.
-    <strong>Sin lector:</strong> escriba código, título o autor y elija de la lista.
+    <strong>Con lector:</strong> apunte y dispare. <strong>Sin lector:</strong> escriba código, título o autor.
   </p>
+
+  <!-- Dropdown teletransportado al body para eludir cualquier overflow/stacking del padre -->
+  <template x-teleport="body">
+    <div x-show="open"
+         x-cloak
+         @click.outside="cerrar()"
+         :style="`position: fixed; left: ${pos.left}px; top: ${pos.top}px; width: ${pos.width}px; z-index: 100;`"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="dropdown-glass rounded-xl border border-slate-200 shadow-2xl shadow-marca-900/15 overflow-hidden"
+         role="listbox">
+
+      <div id="ejemplar-opciones"
+           hx-get="{% url 'prestamos:opciones_ejemplar' %}"
+           hx-trigger="load, refrescar from:body"
+           hx-include="#busqueda_ejemplar"
+           class="max-h-[60vh] overflow-y-auto">
+        <div class="p-6 space-y-3">
+          <div class="skeleton h-4 w-32 rounded"></div>
+          <div class="skeleton h-12 w-full rounded-lg"></div>
+          <div class="skeleton h-12 w-full rounded-lg"></div>
+        </div>
+      </div>
+
+      <footer class="bg-slate-50 px-4 py-2 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+        <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">↑↓</kbd> navegar</span>
+        <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">Enter</kbd> elegir</span>
+        <span class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded border border-slate-300 bg-white font-mono text-[10px]">Esc</kbd> cerrar</span>
+      </footer>
+    </div>
+  </template>
 </div>
 
 <script>
@@ -80,7 +87,17 @@
       return {
         open: false,
         indiceActivo: -1,
-        abrir() { this.open = true; },
+        pos: { left: 0, top: 0, width: 0 },
+        actualizarPos() {
+          const el = this.$refs.input;
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          this.pos = { left: r.left, top: r.bottom + 6, width: r.width };
+        },
+        abrir() {
+          this.actualizarPos();
+          this.open = true;
+        },
         cerrar() { this.open = false; this.indiceActivo = -1; },
         cargar() {
           this.indiceActivo = -1;
@@ -100,6 +117,11 @@
           const ops = this.opciones();
           const elegido = this.indiceActivo >= 0 ? ops[this.indiceActivo] : ops[0];
           elegido?.click();
+        },
+        init() {
+          this.actualizarPos();
+          window.addEventListener('resize', () => this.actualizarPos());
+          window.addEventListener('scroll', () => { if (this.open) this.actualizarPos(); }, true);
         }
       };
     };
