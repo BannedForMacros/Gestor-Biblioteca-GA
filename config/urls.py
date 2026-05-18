@@ -11,6 +11,7 @@ admin.site.index_title = 'Panel de Administración'
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('importar/', include('apps.importacion.urls')),
+    path('prestamos/', include('apps.prestamos.urls')),
     path('admin/', admin.site.urls),
 ]
 

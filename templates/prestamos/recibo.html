@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Préstamo registrado · Gestor Biblioteca{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media print {
+    header, footer, .no-imprimir { display: none !important; }
+    body { background: white; }
+    .anim-entrada, .anim-entrada-1, .anim-entrada-2 { animation: none !important; }
+    .recibo-card { box-shadow: none !important; border: 2px solid #333 !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="bg-gradient-to-br from-acento-600 to-acento-700 text-white no-imprimir">
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    <nav class="anim-entrada flex items-center gap-2 text-acento-100 text-sm mb-3">
+      <a href="{% url 'home' %}" class="hover:text-white transition-colors">Inicio</a>
+      <span aria-hidden="true">›</span>
+      <a href="{% url 'prestamos:nuevo' %}" class="hover:text-white transition-colors">Registrar préstamo</a>
+      <span aria-hidden="true">›</span>
+      <span class="text-white font-medium">Recibo</span>
+    </nav>
+    <div class="anim-entrada-1 flex items-start gap-4">
+      <div class="flex-shrink-0 w-14 h-14 rounded-full bg-white text-acento-700 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-1">Préstamo registrado</h1>
+        <p class="text-lg text-acento-50">El libro fue entregado correctamente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-6 -mt-6 pb-12">
+  <article class="anim-entrada-1 recibo-card bg-white rounded-2xl shadow-lg border-2 border-slate-200 overflow-hidden">
+    <div class="bg-marca-700 text-white px-6 py-4 flex items-center justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-marca-200 font-semibold">Comprobante de préstamo</p>
+        <p class="text-lg font-bold">N° {{ prestamo.id|stringformat:"06d" }}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs uppercase tracking-widest text-marca-200 font-semibold">Registrado el</p>
+        <p class="font-semibold">{{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}</p>
+      </div>
+    </div>
+
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-xs uppercase tracking-widest font-bold text-marca-700 mb-3 border-b-2 border-marca-100 pb-1">Libro entregado</h2>
+        <p class="font-bold text-slate-900 text-lg leading-tight mb-1">
+          {{ prestamo.ejemplar.libro.titulo }}
+        </p>
+        {% if prestamo.ejemplar.libro.autor %}
+          <p class="text-slate-700 text-sm mb-3">{{ prestamo.ejemplar.libro.autor }}</p>
+        {% endif %}
+        <dl class="space-y-1 text-sm">
+          <div class="flex gap-2">
+            <dt class="font-semibold text-slate-600 w-32">Código:</dt>
+            <dd class="font-mono text-slate-900">{{ prestamo.ejemplar.codigo }}</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="font-semibold text-slate-600 w-32">Categoría:</dt>
+            <dd class="text-slate-900">{{ prestamo.ejemplar.libro.categoria.nombre }}</dd>
+          </div>
+          {% if prestamo.ejemplar.ubicacion %}
+            <div class="flex gap-2">
+              <dt class="font-semibold text-slate-600 w-32">Ubicación:</dt>
+              <dd class="text-slate-900">{{ prestamo.ejemplar.ubicacion }}</dd>
+            </div>
+          {% endif %}
+        </dl>
+      </div>
+
+      <div>
+        <h2 class="text-xs uppercase tracking-widest font-bold text-marca-700 mb-3 border-b-2 border-marca-100 pb-1">Persona que recibe</h2>
+        <p class="font-bold text-slate-900 text-lg leading-tight mb-1">
+          {{ prestamo.usuario.apellidos }}, {{ prestamo.usuario.nombres }}
+        </p>
+        <p class="text-slate-700 text-sm mb-3">{{ prestamo.usuario.get_tipo_display }}</p>
+        <dl class="space-y-1 text-sm">
+          <div class="flex gap-2">
+            <dt class="font-semibold text-slate-600 w-32">Código univ.:</dt>
+            <dd class="font-mono text-slate-900">{{ prestamo.usuario.codigo_universitario }}</dd>
+          </div>
+          {% if prestamo.usuario.escuela %}
+            <div class="flex gap-2">
+              <dt class="font-semibold text-slate-600 w-32">Escuela:</dt>
+              <dd class="text-slate-900">{{ prestamo.usuario.escuela }}</dd>
+            </div>
+          {% endif %}
+          {% if prestamo.usuario.telefono %}
+            <div class="flex gap-2">
+              <dt class="font-semibold text-slate-600 w-32">Teléfono:</dt>
+              <dd class="text-slate-900">{{ prestamo.usuario.telefono }}</dd>
+            </div>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <div class="bg-amber-50 border-y-2 border-amber-200 px-6 py-4">
+      <div class="flex items-center gap-4">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold">!</div>
+        <div>
+          <p class="text-xs uppercase tracking-widest font-bold text-amber-800">Fecha límite de devolución</p>
+          <p class="text-2xl font-extrabold text-amber-900">
+            {{ prestamo.fecha_devolucion_esperada|date:"l, d \d\e F \d\e Y" }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {% if prestamo.observaciones %}
+      <div class="px-6 py-4 border-b border-slate-100">
+        <p class="text-xs uppercase tracking-widest font-bold text-slate-600 mb-1">Observaciones</p>
+        <p class="text-slate-700 text-sm">{{ prestamo.observaciones }}</p>
+      </div>
+    {% endif %}
+
+    <div class="px-6 py-4 text-xs text-slate-500 grid grid-cols-1 sm:grid-cols-2 gap-y-1">
+      <p>Registrado por: <strong>{{ prestamo.registrado_por.get_full_name|default:prestamo.registrado_por.username }}</strong></p>
+      <p class="sm:text-right">Estado actual: <strong class="text-acento-700">{{ prestamo.get_estado_display }}</strong></p>
+    </div>
+  </article>
+
+  <div class="anim-entrada-2 no-imprimir mt-6 flex flex-col sm:flex-row gap-3 sm:justify-between">
+    <button onclick="window.print()"
+            class="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition-colors">
+      Imprimir comprobante
+    </button>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <a href="{% url 'home' %}"
+         class="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition-colors">
+        ← Volver al inicio
+      </a>
+      <a href="{% url 'prestamos:nuevo' %}"
+         class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-marca-600 text-white font-bold hover:bg-marca-700 transition-colors shadow-md">
+        Registrar otro préstamo →
+      </a>
+    </div>
+  </div>
+
+</section>
+
+{% endblock %}

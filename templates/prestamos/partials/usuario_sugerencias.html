@@ -1,0 +1,31 @@
+<div class="anim-entrada rounded-xl border-2 border-marca-200 bg-white overflow-hidden">
+  <div class="bg-marca-50 px-5 py-3 border-b-2 border-marca-100">
+    <p class="text-sm text-slate-700">
+      Se encontraron <strong>{{ usuarios|length }}</strong> personas con
+      "<strong>{{ consulta }}</strong>". <strong>Haga clic en quien corresponde:</strong>
+    </p>
+  </div>
+  <ul class="divide-y divide-slate-100 max-h-96 overflow-y-auto">
+    {% for u in usuarios %}
+      <li>
+        <button type="button" data-elegir-usuario="{{ u.codigo_universitario }}"
+                class="w-full text-left px-5 py-3 hover:bg-marca-50 transition-colors flex items-start gap-3">
+          <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded
+            {% if u.activo %}bg-acento-100 text-acento-700{% else %}bg-red-100 text-red-700{% endif %}
+            text-xs font-bold uppercase">
+            {{ u.get_tipo_display }}
+          </span>
+          <span class="flex-1 min-w-0">
+            <span class="block font-semibold text-slate-900 leading-tight">
+              {{ u.apellidos }}, {{ u.nombres }}
+            </span>
+            <span class="block text-xs text-slate-500 mt-0.5">
+              {{ u.codigo_universitario }}{% if u.escuela %} · {{ u.escuela }}{% endif %}
+            </span>
+          </span>
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+<script>document.getElementById('usuario_id_input').value = '';</script>

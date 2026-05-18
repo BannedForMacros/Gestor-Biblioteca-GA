@@ -1,0 +1,65 @@
+<div class="anim-entrada rounded-xl border-2 overflow-hidden
+  {% if disponible %}border-acento-300 bg-acento-50{% else %}border-red-300 bg-red-50{% endif %}">
+
+  <div class="px-5 py-3 flex items-center gap-3 border-b-2
+    {% if disponible %}border-acento-200{% else %}border-red-200{% endif %}">
+    {% if disponible %}
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-acento-600 text-white text-xs font-bold uppercase tracking-wider">
+        ✓ Disponible
+      </span>
+    {% else %}
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold uppercase tracking-wider">
+        ✕ No disponible
+      </span>
+    {% endif %}
+    <span class="text-sm font-mono text-slate-700">{{ ejemplar.codigo }}</span>
+    <span class="ml-auto inline-flex items-center px-2 py-1 rounded bg-white border border-slate-200 text-xs font-semibold text-slate-700">
+      {{ ejemplar.libro.categoria.nombre }}
+    </span>
+  </div>
+
+  <div class="p-5">
+    <h3 class="font-bold text-slate-900 text-lg leading-tight mb-1">
+      {{ ejemplar.libro.titulo }}
+    </h3>
+    <p class="text-slate-700 text-sm mb-3">
+      {% if ejemplar.libro.autor %}{{ ejemplar.libro.autor }}{% else %}<span class="italic text-slate-400">Sin autor registrado</span>{% endif %}
+      {% if ejemplar.libro.anio %} · {{ ejemplar.libro.anio }}{% endif %}
+    </p>
+
+    <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600 mb-4">
+      {% if ejemplar.libro.editorial %}<div><dt class="inline font-semibold">Editorial:</dt> <dd class="inline">{{ ejemplar.libro.editorial }}</dd></div>{% endif %}
+      {% if ejemplar.ubicacion %}<div><dt class="inline font-semibold">Ubicación:</dt> <dd class="inline">{{ ejemplar.ubicacion }}</dd></div>{% endif %}
+      {% if ejemplar.clasificacion %}<div><dt class="inline font-semibold">Clasificación:</dt> <dd class="inline">{{ ejemplar.clasificacion }}</dd></div>{% endif %}
+      <div><dt class="inline font-semibold">Estado físico:</dt> <dd class="inline">{{ ejemplar.get_condicion_display }}</dd></div>
+    </dl>
+
+    {% if disponible %}
+      <div class="bg-white border-2 border-acento-300 rounded-lg p-3 text-sm text-acento-700 font-semibold">
+        Este libro está listo para prestarse. Continúe al paso 2.
+      </div>
+    {% else %}
+      <div class="bg-white border-2 border-red-300 rounded-lg p-3 text-sm text-red-800 space-y-1">
+        <p class="font-bold">Este ejemplar no se puede prestar ahora.</p>
+        <p>Estado actual: <strong>{{ ejemplar.get_estado_display }}</strong>.</p>
+        {% if prestamo_activo %}
+          <p>
+            Está prestado a <strong>{{ prestamo_activo.usuario.nombre_completo }}</strong>
+            ({{ prestamo_activo.usuario.codigo_universitario }})
+            desde el {{ prestamo_activo.fecha_prestamo|date:"d/m/Y" }}.
+          </p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.getElementById('ejemplar_id_input').value = '{% if disponible %}{{ ejemplar.id }}{% endif %}';
+  document.body.dispatchEvent(new Event('change'));
+  if ({% if disponible %}true{% else %}false{% endif %}) {
+    setTimeout(function() {
+      document.getElementById('busqueda_usuario').focus();
+    }, 100);
+  }
+</script>

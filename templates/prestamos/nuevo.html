@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Préstamo · Gestor Biblioteca{% endblock %}
+
+{% block extra_head %}
+<style>
+  .paso[data-bloqueado="true"] { opacity: 0.55; pointer-events: none; filter: saturate(0.6); }
+  .paso { transition: opacity 280ms ease, filter 280ms ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="bg-gradient-to-br from-marca-700 to-marca-800 text-white">
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <nav class="anim-entrada flex items-center gap-2 text-marca-200 text-sm mb-3">
+      <a href="{% url 'home' %}" class="hover:text-white transition-colors">Inicio</a>
+      <span aria-hidden="true">›</span>
+      <span class="text-white font-medium">Registrar préstamo</span>
+    </nav>
+    <h1 class="anim-entrada-1 text-3xl sm:text-4xl font-extrabold mb-2">
+      Registrar un préstamo
+    </h1>
+    <p class="anim-entrada-2 text-marca-100 text-lg leading-relaxed">
+      Complete los tres pasos en orden. Puede usar el lector de código de barras
+      en cualquier momento — simplemente apunte y dispare al campo del paso 1.
+    </p>
+  </div>
+</section>
+
+<form method="post" action="{% url 'prestamos:confirmar' %}" class="max-w-5xl mx-auto px-6 -mt-6 pb-16">
+  {% csrf_token %}
+
+  <input type="hidden" name="ejemplar_id" id="ejemplar_id_input">
+  <input type="hidden" name="usuario_id" id="usuario_id_input">
+
+  <!-- ============ PASO 1: LIBRO ============ -->
+  <section id="paso-1" class="paso anim-entrada-1 bg-white rounded-2xl shadow-md border-2 border-marca-200 overflow-hidden mb-6">
+    <header class="bg-marca-50 px-6 py-4 border-b-2 border-marca-100 flex items-center gap-4">
+      <span class="flex-shrink-0 w-11 h-11 rounded-full bg-marca-600 text-white flex items-center justify-center font-bold text-lg">1</span>
+      <div>
+        <h2 class="font-bold text-marca-900 text-lg">Identifique el libro</h2>
+        <p class="text-sm text-slate-600">Escanee el código de barras o búsquelo por título.</p>
+      </div>
+    </header>
+
+    <div class="p-6 space-y-5">
+      <div>
+        <label for="busqueda_ejemplar" class="block text-sm font-semibold text-slate-800 mb-2">
+          Código del libro (escanee o escriba)
+        </label>
+        <input
+          type="text"
+          id="busqueda_ejemplar"
+          name="busqueda_ejemplar"
+          autofocus
+          autocomplete="off"
+          placeholder="Ej: L-ECON-0001 — el lector escribe esto automáticamente"
+          class="w-full text-lg px-4 py-3 rounded-lg border-2 border-slate-300 focus:border-marca-600 focus:ring-0 transition-colors"
+          hx-get="{% url 'prestamos:buscar_ejemplar' %}"
+          hx-trigger="keyup[key=='Enter'], input changed delay:400ms"
+          hx-target="#resultado-ejemplar"
+          hx-indicator="#cargando-ejemplar"
+          hx-include="this">
+        <p class="text-xs text-slate-500 mt-2">
+          <strong>Sugerencia:</strong> si tiene el libro en la mano, simplemente apunte el lector al código de barras
+          y se completará solo. Si no, escriba el código o palabras del título.
+        </p>
+        <div id="cargando-ejemplar" class="htmx-indicator mt-2 text-sm text-marca-600">Buscando…</div>
+      </div>
+
+      <div id="resultado-ejemplar">
+        {% include "prestamos/partials/ejemplar_vacio.html" %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PASO 2: USUARIO ============ -->
+  <section id="paso-2" class="paso anim-entrada-2 bg-white rounded-2xl shadow-md border-2 border-slate-200 overflow-hidden mb-6" data-bloqueado="true">
+    <header class="bg-slate-50 px-6 py-4 border-b-2 border-slate-200 flex items-center gap-4">
+      <span class="flex-shrink-0 w-11 h-11 rounded-full bg-slate-600 text-white flex items-center justify-center font-bold text-lg">2</span>
+      <div>
+        <h2 class="font-bold text-slate-800 text-lg">Identifique a quien recibe el libro</h2>
+        <p class="text-sm text-slate-600">Estudiante, docente o personal administrativo.</p>
+      </div>
+    </header>
+
+    <div class="p-6 space-y-5">
+      <div>
+        <label for="busqueda_usuario" class="block text-sm font-semibold text-slate-800 mb-2">
+          Código universitario o nombre
+        </label>
+        <input
+          type="text"
+          id="busqueda_usuario"
+          name="busqueda_usuario"
+          autocomplete="off"
+          placeholder="Ej: 175000A o el apellido"
+          class="w-full text-lg px-4 py-3 rounded-lg border-2 border-slate-300 focus:border-marca-600 focus:ring-0 transition-colors"
+          hx-get="{% url 'prestamos:buscar_usuario' %}"
+          hx-trigger="keyup[key=='Enter'], input changed delay:400ms"
+          hx-target="#resultado-usuario"
+          hx-indicator="#cargando-usuario"
+          hx-include="this">
+        <p class="text-xs text-slate-500 mt-2">
+          <strong>Si la persona no aparece</strong>, puede registrarla primero desde
+          el botón "Registrar persona" del inicio, y volver aquí.
+        </p>
+        <div id="cargando-usuario" class="htmx-indicator mt-2 text-sm text-marca-600">Buscando…</div>
+      </div>
+
+      <div id="resultado-usuario">
+        {% include "prestamos/partials/usuario_vacio.html" %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PASO 3: CONFIRMAR ============ -->
+  <section id="paso-3" class="paso anim-entrada-3 bg-white rounded-2xl shadow-md border-2 border-slate-200 overflow-hidden" data-bloqueado="true">
+    <header class="bg-slate-50 px-6 py-4 border-b-2 border-slate-200 flex items-center gap-4">
+      <span class="flex-shrink-0 w-11 h-11 rounded-full bg-slate-600 text-white flex items-center justify-center font-bold text-lg">3</span>
+      <div>
+        <h2 class="font-bold text-slate-800 text-lg">Confirme el préstamo</h2>
+        <p class="text-sm text-slate-600">Revise los datos y registre la entrega.</p>
+      </div>
+    </header>
+
+    <div class="p-6 space-y-5">
+      <div>
+        <label for="fecha_devolucion" class="block text-sm font-semibold text-slate-800 mb-2">
+          Fecha en que debe devolver el libro
+        </label>
+        <input
+          type="date"
+          id="fecha_devolucion"
+          name="fecha_devolucion"
+          value="{{ fecha_devolucion_default }}"
+          required
+          class="text-lg px-4 py-3 rounded-lg border-2 border-slate-300 focus:border-marca-600 focus:ring-0 transition-colors">
+        <p class="text-xs text-slate-500 mt-2">
+          Por defecto se asigna 7 días. Modifique si la entrega será en otra fecha.
+        </p>
+      </div>
+
+      <div>
+        <label for="observaciones" class="block text-sm font-semibold text-slate-800 mb-2">
+          Observaciones (opcional)
+        </label>
+        <textarea
+          id="observaciones"
+          name="observaciones"
+          rows="2"
+          placeholder="Ej: El libro tiene una página doblada al inicio."
+          class="w-full px-4 py-3 rounded-lg border-2 border-slate-300 focus:border-marca-600 focus:ring-0 transition-colors"></textarea>
+      </div>
+
+      <div class="bg-acento-50 border-l-4 border-acento-600 rounded-r p-4 text-sm text-slate-700">
+        Al confirmar, el libro quedará marcado como <strong>prestado</strong>
+        en el catálogo y aparecerá en el historial de la persona.
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 sm:justify-end pt-2">
+        <a href="{% url 'home' %}"
+           class="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition-colors">
+          Cancelar
+        </a>
+        <button type="submit" id="btn-confirmar"
+                class="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-acento-600 text-white font-bold hover:bg-acento-700 transition-colors shadow-md text-lg disabled:bg-slate-400">
+          Confirmar préstamo →
+        </button>
+      </div>
+    </div>
+  </section>
+
+</form>
+
+<script>
+  function actualizarBloqueos() {
+    const tieneEjemplar = !!document.getElementById('ejemplar_id_input').value;
+    const tieneUsuario = !!document.getElementById('usuario_id_input').value;
+    const paso2 = document.getElementById('paso-2');
+    const paso3 = document.getElementById('paso-3');
+
+    paso2.dataset.bloqueado = tieneEjemplar ? "false" : "true";
+    paso3.dataset.bloqueado = (tieneEjemplar && tieneUsuario) ? "false" : "true";
+
+    if (tieneEjemplar) {
+      paso2.classList.remove('border-slate-200');
+      paso2.classList.add('border-marca-200');
+      paso2.querySelector('header').classList.remove('bg-slate-50', 'border-slate-200');
+      paso2.querySelector('header').classList.add('bg-marca-50', 'border-marca-100');
+      paso2.querySelector('header span').classList.remove('bg-slate-600');
+      paso2.querySelector('header span').classList.add('bg-marca-600');
+    }
+    if (tieneEjemplar && tieneUsuario) {
+      paso3.classList.remove('border-slate-200');
+      paso3.classList.add('border-acento-300');
+      paso3.querySelector('header').classList.remove('bg-slate-50', 'border-slate-200');
+      paso3.querySelector('header').classList.add('bg-acento-50', 'border-acento-200');
+      paso3.querySelector('header span').classList.remove('bg-slate-600');
+      paso3.querySelector('header span').classList.add('bg-acento-600');
+    }
+  }
+
+  document.body.addEventListener('htmx:afterSwap', actualizarBloqueos);
+  document.body.addEventListener('change', actualizarBloqueos);
+
+  document.body.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-elegir-ejemplar]');
+    if (target) {
+      const input = document.getElementById('busqueda_ejemplar');
+      input.value = target.dataset.elegirEjemplar;
+      htmx.trigger(input, 'keyup', {key: 'Enter'});
+    }
+    const targetU = e.target.closest('[data-elegir-usuario]');
+    if (targetU) {
+      const input = document.getElementById('busqueda_usuario');
+      input.value = targetU.dataset.elegirUsuario;
+      htmx.trigger(input, 'keyup', {key: 'Enter'});
+    }
+  });
+</script>
+
+{% endblock %}
