@@ -8,7 +8,8 @@
       "PowerShell($psqlPath = Get-ChildItem \"C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe\" -ErrorAction SilentlyContinue; if \\($psqlPath\\) { Write-Output \"psql encontrado: $\\($psqlPath.FullName\\)\" } else { Get-ChildItem \"C:\\\\Program Files\\\\PostgreSQL\\\\\" -Directory -ErrorAction SilentlyContinue | Select-Object Name })",
       "PowerShell(python -m venv \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\"; & \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\python.exe\" -m pip install --upgrade pip --quiet; & \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\python.exe\" --version)",
       "PowerShell(& \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\pip.exe\" install -r \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\requirements.txt\" --quiet 2>&1 | Select-Object -Last 10)",
-      "PowerShell(& \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import django, psycopg, openpyxl, pandas, decouple, django_htmx; print\\('Django', django.get_version\\(\\)\\); print\\('psycopg', psycopg.__version__\\); print\\('pandas', pandas.__version__\\); print\\('OK'\\)\")"
+      "PowerShell(& \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import django, psycopg, openpyxl, pandas, decouple, django_htmx; print\\('Django', django.get_version\\(\\)\\); print\\('psycopg', psycopg.__version__\\); print\\('pandas', pandas.__version__\\); print\\('OK'\\)\")",
+      "PowerShell(New-Item *)"
     ]
   }
 }
