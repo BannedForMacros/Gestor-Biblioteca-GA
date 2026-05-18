@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestor Biblioteca FACEAC{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              marca: {
+                50:  '#F5F0FB',
+                100: '#E9DEF6',
+                200: '#D2BCEC',
+                300: '#B294DC',
+                400: '#8E63C8',
+                500: '#6F3FB1',
+                600: '#5B2D8E',
+                700: '#48246F',
+                800: '#371B54',
+                900: '#26133B',
+              },
+              acento: {
+                50:  '#ECFDF5',
+                100: '#D1FAE5',
+                300: '#6EE7B7',
+                500: '#10B981',
+                600: '#059669',
+                700: '#047857',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+
+    <style>
+      html { scroll-behavior: smooth; }
+      body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .anim-entrada { animation: fadeUp 350ms ease-out both; }
+      .anim-entrada-1 { animation: fadeUp 400ms ease-out 60ms both; }
+      .anim-entrada-2 { animation: fadeUp 400ms ease-out 120ms both; }
+      .anim-entrada-3 { animation: fadeUp 400ms ease-out 180ms both; }
+      .anim-entrada-4 { animation: fadeUp 400ms ease-out 240ms both; }
+
+      *:focus-visible {
+        outline: 3px solid #10B981;
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      .card-hover { transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }
+      .card-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -10px rgba(91, 45, 142, 0.25); }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <header class="bg-white border-b-2 border-marca-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+        <img src="{% static 'img/logo.png' %}" alt="Logo GestorBiblioteca" class="h-12 w-auto">
+        <span class="sr-only">Ir al inicio</span>
+      </a>
+      <nav aria-label="Acceso principal" class="flex items-center gap-3">
+        {% if user.is_authenticated %}
+          <span class="text-sm text-slate-600 hidden sm:inline">
+            Hola, <strong class="text-marca-700">{{ user.get_full_name|default:user.username }}</strong>
+          </span>
+          <a href="/admin/logout/"
+             class="text-sm font-semibold px-4 py-2 rounded-lg border-2 border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors">
+            Cerrar sesión
+          </a>
+        {% else %}
+          <a href="/admin/login/?next=/"
+             class="text-sm font-semibold px-5 py-2.5 rounded-lg bg-marca-600 text-white hover:bg-marca-700 transition-colors shadow-sm">
+            Iniciar sesión
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 mt-12">
+    <div class="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-slate-500">
+      <p>
+        <strong class="text-marca-700">Gestor Biblioteca</strong> — FACEAC
+        · Responsabilidad Social Universitaria
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
