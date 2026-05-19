@@ -220,9 +220,11 @@ def seleccionar_usuario(request):
     """HTMX: el usuario eligió a una persona."""
     usuario_id = request.GET.get("id")
     usuario = get_object_or_404(UsuarioBiblioteca, pk=usuario_id)
+    sancion = usuario.sancion_bloqueante()
     return render(request, "prestamos/partials/usuario_seleccionado.html", {
         "usuario": usuario,
-        "puede_pedir": usuario.activo,
+        "puede_pedir": usuario.activo and sancion is None,
+        "sancion": sancion,
     })
 
 
@@ -269,6 +271,24 @@ def confirmar(request):
                     "mensaje": (
                         f"{usuario.nombre_completo} figura como inactivo en el sistema. "
                         f"Active su registro antes de hacerle un préstamo."
+                    ),
+                })
+
+            sancion_activa = usuario.sancion_bloqueante()
+            if sancion_activa:
+                detalle = sancion_activa.get_motivo_display()
+                if sancion_activa.fecha_fin:
+                    detalle += (
+                        f" — bloqueo vigente hasta el "
+                        f"{sancion_activa.fecha_fin:%d/%m/%Y}"
+                    )
+                else:
+                    detalle += " — bloqueo indefinido"
+                return render(request, "prestamos/error.html", {
+                    "titulo": "La persona está sancionada",
+                    "mensaje": (
+                        f"{usuario.nombre_completo} no puede recibir préstamos "
+                        f"({detalle}). Levante la sanción si corresponde."
                     ),
                 })
 

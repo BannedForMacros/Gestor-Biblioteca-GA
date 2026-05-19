@@ -39,10 +39,20 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Inactivo
               </span>
             {% endif %}
+            {% if sancion_bloqueante %}
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs font-bold">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Sancionado
+              </span>
+            {% endif %}
           </div>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">
+        <a href="{% url 'usuarios:sancion_aplicar' persona.id %}"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-red-200 text-red-700 text-sm font-semibold hover:bg-red-50 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+          Aplicar sanción
+        </a>
         <form method="post" action="{% url 'usuarios:persona_toggle' persona.id %}">
           {% csrf_token %}
           <button type="submit"
@@ -58,6 +68,39 @@
       </div>
     </div>
   </header>
+
+  {% if sancion_bloqueante %}
+    <div class="anim-entrada-1 mb-6 bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-red-600 text-white flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-base font-bold text-red-900">Esta persona está sancionada y no puede pedir préstamos.</p>
+          <p class="text-sm text-red-800 mt-1">
+            <strong>{{ sancion_bloqueante.get_motivo_display }}</strong> · {{ sancion_bloqueante.get_tipo_display }}
+            {% if sancion_bloqueante.fecha_fin %}
+              · hasta el <strong>{{ sancion_bloqueante.fecha_fin|date:"d M Y" }}</strong>
+              {% if sancion_bloqueante.dias_restantes %} ({{ sancion_bloqueante.dias_restantes }} día{{ sancion_bloqueante.dias_restantes|pluralize:"s" }} restantes){% endif %}
+            {% else %}
+              · <strong>indefinido</strong>
+            {% endif %}
+          </p>
+          {% if sancion_bloqueante.descripcion %}
+            <p class="text-sm text-red-700 mt-2 italic">{{ sancion_bloqueante.descripcion }}</p>
+          {% endif %}
+        </div>
+        <form method="post" action="{% url 'usuarios:sancion_levantar' sancion_bloqueante.id %}" class="flex-shrink-0">
+          {% csrf_token %}
+          <button type="submit"
+                  onclick="return confirm('¿Levantar esta sanción? El usuario podrá pedir préstamos nuevamente.')"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-red-200 text-xs font-semibold text-red-800 hover:bg-red-100">
+            Levantar
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -83,7 +126,9 @@
       </dl>
     </section>
 
-    <section class="anim-entrada-2 lg:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div class="lg:col-span-2 space-y-6">
+
+    <section class="anim-entrada-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
       <header class="px-6 py-4 border-b border-slate-100">
         <h2 class="font-bold text-slate-900 text-sm">Historial de préstamos</h2>
         <p class="text-xs text-slate-500 mt-0.5">Últimos {{ prestamos|length }} registros</p>
@@ -123,6 +168,66 @@
         </div>
       {% endif %}
     </section>
+
+    <section class="anim-entrada-3 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <header class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="font-bold text-slate-900 text-sm">Sanciones</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Últimos {{ sanciones|length }} registros · {% if sancion_bloqueante %}<strong class="text-red-700">1 vigente</strong>{% else %}sin bloqueos activos{% endif %}</p>
+        </div>
+        <a href="{% url 'usuarios:sancion_aplicar' persona.id %}" class="text-xs font-semibold text-red-700 hover:text-red-900 inline-flex items-center gap-1">+ Aplicar sanción</a>
+      </header>
+      {% if sanciones %}
+        <ul class="divide-y divide-slate-100">
+          {% for s in sanciones %}
+            <li class="px-6 py-3 flex items-start gap-3 hover:bg-slate-50/60 transition-colors {% if not s.activa or s.expirada %}opacity-60{% endif %}">
+              <span class="flex-shrink-0 w-2 h-2 mt-1.5 rounded-full
+                           {% if s.vigente %}bg-red-500
+                           {% elif s.tipo == 'ADV' and s.activa %}bg-amber-500
+                           {% else %}bg-slate-300{% endif %}"></span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="font-semibold text-slate-900 text-sm">{{ s.get_motivo_display }}</p>
+                  <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
+                               {% if s.vigente %}bg-red-50 text-red-700
+                               {% elif s.tipo == 'ADV' %}bg-amber-50 text-amber-800
+                               {% else %}bg-slate-100 text-slate-600{% endif %}">
+                    {{ s.get_tipo_display }}
+                  </span>
+                  {% if not s.activa %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">Levantada</span>
+                  {% elif s.expirada %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">Expirada</span>
+                  {% endif %}
+                </div>
+                {% if s.descripcion %}<p class="text-xs text-slate-600 mt-0.5">{{ s.descripcion }}</p>{% endif %}
+                <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-400">
+                  <span>{{ s.fecha_inicio|date:"d M Y" }}</span>
+                  {% if s.fecha_fin %}<span>→ {{ s.fecha_fin|date:"d M Y" }}</span>{% endif %}
+                  {% if s.creada_por %}<span>· por {{ s.creada_por.username }}</span>{% endif %}
+                  {% if not s.activa and s.levantada_por %}<span>· levantada por {{ s.levantada_por.username }}</span>{% endif %}
+                </div>
+              </div>
+              {% if s.vigente %}
+                <form method="post" action="{% url 'usuarios:sancion_levantar' s.id %}" class="flex-shrink-0">
+                  {% csrf_token %}
+                  <button type="submit"
+                          onclick="return confirm('¿Levantar esta sanción?')"
+                          class="text-xs font-semibold text-acento-700 hover:text-acento-900">Levantar</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="px-6 py-10 text-center">
+          <p class="text-sm font-semibold text-slate-700">Sin sanciones</p>
+          <p class="text-xs text-slate-500 mt-1">Esta persona no ha recibido sanciones todavía.</p>
+        </div>
+      {% endif %}
+    </section>
+
+    </div>
 
   </div>
 </div>

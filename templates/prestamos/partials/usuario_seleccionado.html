@@ -52,8 +52,16 @@
 
     {% if not puede_pedir %}
       <div class="mx-5 mb-5 bg-white border border-red-200 rounded-xl p-3 text-sm text-red-800">
-        <strong>Esta persona está inactiva</strong> y no puede recibir préstamos.
-        Active su registro desde el panel de administración.
+        {% if sancion %}
+          <strong>Esta persona está sancionada</strong> y no puede recibir préstamos.<br>
+          <span class="text-xs">
+            Motivo: <strong>{{ sancion.get_motivo_display }}</strong> · {{ sancion.get_tipo_display }}
+            {% if sancion.fecha_fin %} · hasta {{ sancion.fecha_fin|date:"d M Y" }}{% if sancion.dias_restantes %} ({{ sancion.dias_restantes }} día{{ sancion.dias_restantes|pluralize:"s" }} restantes){% endif %}{% else %} · indefinido{% endif %}
+          </span>
+        {% else %}
+          <strong>Esta persona está inactiva</strong> y no puede recibir préstamos.
+          Active su registro desde el panel de administración.
+        {% endif %}
       </div>
     {% endif %}
   </div>

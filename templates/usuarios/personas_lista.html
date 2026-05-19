@@ -19,11 +19,18 @@
           <span class="font-semibold text-slate-700 tabular-nums">{{ total }}</span> persona{{ total|pluralize }} registrada{{ total|pluralize }}
         </p>
       </div>
-      <a href="{% url 'usuarios:persona_nueva' %}"
-         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-marca-600 to-marca-700 text-white text-sm font-semibold hover:from-marca-700 hover:to-marca-800 shadow-md hover:shadow-lg hover:shadow-marca-500/30 transition-all">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/></svg>
-        Registrar persona
-      </a>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'usuarios:sanciones_lista' %}"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-red-200 text-red-700 text-sm font-semibold hover:bg-red-50 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+          Sanciones
+        </a>
+        <a href="{% url 'usuarios:persona_nueva' %}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-marca-600 to-marca-700 text-white text-sm font-semibold hover:from-marca-700 hover:to-marca-800 shadow-md hover:shadow-lg hover:shadow-marca-500/30 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/></svg>
+          Registrar persona
+        </a>
+      </div>
     </div>
   </header>
 
@@ -51,8 +58,15 @@
       </select>
       <svg class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
     </div>
+    <div class="md:col-span-2 relative">
+      <select name="estado" class="w-full appearance-none pl-4 pr-10 py-2.5 rounded-xl border-2 border-slate-200 bg-white shadow-sm focus:border-marca-500 focus:ring-0 focus:shadow-md transition-all text-sm">
+        <option value="">Bloqueo: todos</option>
+        <option value="bloqueado" {% if estado == "bloqueado" %}selected{% endif %}>Solo sancionados</option>
+      </select>
+      <svg class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+    </div>
     <button type="submit"
-            class="md:col-span-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors">
+            class="md:col-span-12 lg:col-span-2 md:col-start-11 lg:col-start-11 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors">
       Filtrar
     </button>
   </form>
@@ -99,15 +113,22 @@
                 <td class="px-6 py-3.5 text-slate-700">{{ p.escuela|default:"—" }}</td>
                 <td class="px-6 py-3.5 text-center font-mono tabular-nums text-slate-900 font-semibold">{{ p.n_prestamos }}</td>
                 <td class="px-6 py-3.5">
-                  {% if p.activo %}
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-acento-50 text-acento-700 text-xs font-semibold">
-                      <span class="w-1.5 h-1.5 rounded-full bg-acento-500"></span>Activo
-                    </span>
-                  {% else %}
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">
-                      <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Inactivo
-                    </span>
-                  {% endif %}
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    {% if p.activo %}
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-acento-50 text-acento-700 text-xs font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-acento-500"></span>Activo
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Inactivo
+                      </span>
+                    {% endif %}
+                    {% if p.n_sanciones_activas %}
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 text-xs font-bold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Sancionado
+                      </span>
+                    {% endif %}
+                  </div>
                 </td>
                 <td class="px-6 py-3.5 text-right">
                   <div class="inline-flex items-center gap-1">
@@ -127,7 +148,7 @@
         </table>
       </div>
       <div class="px-6 py-4 border-t border-slate-100">
-        {% include "_partials/pagination.html" with page=page querystring="q="|add:q|add:"&tipo="|add:tipo|add:"&activo="|add:activo %}
+        {% include "_partials/pagination.html" with page=page querystring="q="|add:q|add:"&tipo="|add:tipo|add:"&activo="|add:activo|add:"&estado="|add:estado %}
       </div>
     {% else %}
       <div class="px-6 py-16 text-center">

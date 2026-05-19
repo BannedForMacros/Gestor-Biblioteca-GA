@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Sanciones · Gestor Biblioteca{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+  <header class="anim-entrada mb-7">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="{% url 'home' %}" class="hover:text-marca-700 transition-colors">Inicio</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <a href="{% url 'usuarios:personas_lista' %}" class="hover:text-marca-700 transition-colors">Personas</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <span class="text-slate-700 font-medium">Sanciones</span>
+    </nav>
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+      <div>
+        <p class="text-sm font-semibold text-marca-600 uppercase tracking-wider mb-1">Personas</p>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Sanciones y restricciones</h1>
+        <p class="text-sm text-slate-500 mt-1">Personas con bloqueos vigentes para préstamos.</p>
+      </div>
+      <a href="{% url 'usuarios:personas_lista' %}" class="text-xs font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1">← Volver a personas</a>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <article class="anim-entrada-1 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bloqueos vigentes</p>
+      <p class="text-3xl font-extrabold {% if stats.bloqueantes %}text-red-700{% else %}text-slate-900{% endif %} mt-1 tabular-nums">{{ stats.bloqueantes }}</p>
+      <p class="text-xs text-slate-500 mt-1">impiden préstamos</p>
+    </article>
+    <article class="anim-entrada-1 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Advertencias</p>
+      <p class="text-3xl font-extrabold {% if stats.advertencias %}text-amber-700{% else %}text-slate-900{% endif %} mt-1 tabular-nums">{{ stats.advertencias }}</p>
+      <p class="text-xs text-slate-500 mt-1">sin bloqueo</p>
+    </article>
+    <article class="anim-entrada-2 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Histórico total</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1 tabular-nums">{{ stats.total }}</p>
+      <p class="text-xs text-slate-500 mt-1">incluyendo levantadas/expiradas</p>
+    </article>
+  </section>
+
+  <!-- Bloqueos vigentes -->
+  <section class="anim-entrada-3 bg-white rounded-2xl border border-slate-200 overflow-hidden mb-6">
+    <header class="px-5 py-4 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Bloqueos vigentes</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Estas personas no pueden recibir préstamos hasta que se cumpla la fecha o se levante el bloqueo.</p>
+    </header>
+    {% if bloqueantes %}
+      <ul class="divide-y divide-slate-100">
+        {% for s in bloqueantes %}
+          <li class="px-5 py-4 flex items-start gap-4 hover:bg-slate-50/60 transition-colors">
+            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 text-red-700 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <a href="{% url 'usuarios:persona_detalle' s.usuario.id %}" class="font-bold text-slate-900 hover:text-marca-700">{{ s.usuario.nombre_completo }}</a>
+                <span class="font-mono text-xs text-slate-500">{{ s.usuario.codigo_universitario }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700">{{ s.get_tipo_display }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700">{{ s.get_motivo_display }}</span>
+              </div>
+              {% if s.descripcion %}<p class="text-sm text-slate-600 mt-1">{{ s.descripcion }}</p>{% endif %}
+              <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                <span>Desde {{ s.fecha_inicio|date:"d M Y" }}</span>
+                {% if s.fecha_fin %}
+                  <span>·</span>
+                  <span>Hasta <strong class="text-slate-700">{{ s.fecha_fin|date:"d M Y" }}</strong>
+                    {% if s.dias_restantes %} ({{ s.dias_restantes }} día{{ s.dias_restantes|pluralize:"s" }} restantes){% endif %}
+                  </span>
+                {% else %}
+                  <span>·</span><span class="text-red-700 font-semibold">Indefinido</span>
+                {% endif %}
+                {% if s.creada_por %}<span>·</span><span>Aplicada por {{ s.creada_por.username }}</span>{% endif %}
+              </div>
+            </div>
+            <form method="post" action="{% url 'usuarios:sancion_levantar' s.id %}" class="flex-shrink-0">
+              {% csrf_token %}
+              <button type="submit"
+                      onclick="return confirm('¿Levantar esta sanción? El usuario podrá pedir préstamos nuevamente.')"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:border-acento-300 hover:text-acento-700">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                Levantar
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="px-6 py-12 text-center">
+        <div class="mx-auto w-12 h-12 rounded-2xl bg-acento-50 text-acento-600 flex items-center justify-center mb-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+        </div>
+        <p class="text-sm font-semibold text-slate-700">Nadie tiene bloqueos vigentes</p>
+        <p class="text-xs text-slate-500 mt-1">Todos los usuarios pueden pedir préstamos.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Advertencias activas -->
+  {% if advertencias %}
+  <section class="anim-entrada-4 bg-white rounded-2xl border border-slate-200 overflow-hidden mb-6">
+    <header class="px-5 py-4 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Advertencias activas</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Sin bloqueo, solo registro de incidente.</p>
+    </header>
+    <ul class="divide-y divide-slate-100">
+      {% for s in advertencias %}
+        <li class="px-5 py-3 flex items-center gap-3">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <a href="{% url 'usuarios:persona_detalle' s.usuario.id %}" class="font-semibold text-slate-900 hover:text-marca-700 text-sm">{{ s.usuario.nombre_completo }}</a>
+          <span class="font-mono text-xs text-slate-400">{{ s.usuario.codigo_universitario }}</span>
+          <span class="ml-auto text-xs text-slate-500">{{ s.get_motivo_display }} · {{ s.fecha_inicio|date:"d M Y" }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <!-- Historial -->
+  {% if historial %}
+  <section class="anim-entrada-4 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <header class="px-5 py-4 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Historial reciente</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Sanciones levantadas o expiradas.</p>
+    </header>
+    <ul class="divide-y divide-slate-100">
+      {% for s in historial %}
+        <li class="px-5 py-3 flex items-center gap-3 text-sm">
+          <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+          <a href="{% url 'usuarios:persona_detalle' s.usuario.id %}" class="font-semibold text-slate-700 hover:text-marca-700">{{ s.usuario.nombre_completo }}</a>
+          <span class="text-xs text-slate-500">{{ s.get_motivo_display }} · {{ s.get_tipo_display }}</span>
+          <span class="ml-auto text-xs text-slate-400">
+            {% if s.levantada_en %}Levantada {{ s.levantada_en|date:"d M Y" }}{% else %}Expiró {{ s.fecha_fin|date:"d M Y" }}{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}
