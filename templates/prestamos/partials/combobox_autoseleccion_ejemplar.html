@@ -2,6 +2,10 @@
      hx-target="#combobox-ejemplar"
      hx-swap="outerHTML"
      hx-trigger="load">
+  <script>
+    // Beep de éxito al detectar coincidencia exacta de código (lector de barras)
+    if (window.beepEscanerOk) window.beepEscanerOk();
+  </script>
   <div class="px-6 py-8 text-center">
     <div class="inline-flex items-center gap-2 text-marca-600 text-sm font-semibold">
       <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">

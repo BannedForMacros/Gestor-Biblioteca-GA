@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'apps.prestamos',
     'apps.importacion',
     'apps.reportes',
+    'apps.alertas',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +55,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.alertas.context_processors.alertas',
             ],
         },
     },

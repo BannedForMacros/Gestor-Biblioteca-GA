@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes · Gestor Biblioteca{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+  <header class="anim-entrada mb-8">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="{% url 'home' %}" class="hover:text-marca-700 transition-colors">Inicio</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <span class="text-slate-700 font-medium">Reportes</span>
+    </nav>
+    <p class="text-sm font-semibold text-marca-600 uppercase tracking-wider mb-1">Analítica</p>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Reportes e indicadores</h1>
+    <p class="text-sm text-slate-500 mt-1">Visión operativa y estratégica del uso de la biblioteca.</p>
+  </header>
+
+  <!-- KPIs -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <article class="anim-entrada-1 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Títulos</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1 tabular-nums">{{ kpis.total_libros }}</p>
+    </article>
+    <article class="anim-entrada-1 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ejemplares</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1 tabular-nums">{{ kpis.total_ejemplares }}</p>
+    </article>
+    <article class="anim-entrada-2 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Préstamos activos</p>
+      <p class="text-3xl font-extrabold text-slate-900 mt-1 tabular-nums">{{ kpis.prestamos_activos }}</p>
+    </article>
+    <article class="anim-entrada-2 bg-white rounded-2xl border border-slate-200 p-5">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Vencidos</p>
+      <p class="text-3xl font-extrabold {% if kpis.vencidos > 0 %}text-red-700{% else %}text-slate-900{% endif %} mt-1 tabular-nums">{{ kpis.vencidos }}</p>
+    </article>
+  </section>
+
+  <!-- Cards de reportes -->
+  <section class="anim-entrada-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <a href="{% url 'reportes:libros_mas_prestados' %}"
+       class="group block bg-white rounded-2xl border border-slate-200 p-5 hover:border-marca-300 hover:shadow-md hover:shadow-marca-100 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-marca-50 text-marca-700 flex items-center justify-center group-hover:bg-marca-600 group-hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125C16.5 3.504 17.004 3 17.625 3h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+        </div>
+        <svg class="w-4 h-4 text-slate-300 group-hover:text-marca-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+      <h3 class="font-bold text-slate-900">Libros más prestados</h3>
+      <p class="text-xs text-slate-500 mt-1">Ranking de los títulos con más rotación en un período.</p>
+    </a>
+
+    <a href="{% url 'reportes:usuarios_frecuentes' %}"
+       class="group block bg-white rounded-2xl border border-slate-200 p-5 hover:border-marca-300 hover:shadow-md hover:shadow-marca-100 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-acento-50 text-acento-700 flex items-center justify-center group-hover:bg-acento-600 group-hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+        </div>
+        <svg class="w-4 h-4 text-slate-300 group-hover:text-acento-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+      <h3 class="font-bold text-slate-900">Usuarios más frecuentes</h3>
+      <p class="text-xs text-slate-500 mt-1">Quiénes han pedido más préstamos en el período.</p>
+    </a>
+
+    <a href="{% url 'reportes:inventario' %}"
+       class="group block bg-white rounded-2xl border border-slate-200 p-5 hover:border-marca-300 hover:shadow-md hover:shadow-marca-100 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-slate-700 group-hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5Z"/></svg>
+        </div>
+        <svg class="w-4 h-4 text-slate-300 group-hover:text-slate-700 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+      <h3 class="font-bold text-slate-900">Estado del inventario</h3>
+      <p class="text-xs text-slate-500 mt-1">Distribución por estado, condición y categoría.</p>
+    </a>
+
+    <a href="{% url 'reportes:prestamos_periodo' %}"
+       class="group block bg-white rounded-2xl border border-slate-200 p-5 hover:border-marca-300 hover:shadow-md hover:shadow-marca-100 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-marca-50 text-marca-700 flex items-center justify-center group-hover:bg-marca-600 group-hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+        </div>
+        <svg class="w-4 h-4 text-slate-300 group-hover:text-marca-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+      <h3 class="font-bold text-slate-900">Préstamos por período</h3>
+      <p class="text-xs text-slate-500 mt-1">Volumen diario, totales y desglose por escuela.</p>
+    </a>
+
+    <a href="{% url 'reportes:no_devueltos' %}"
+       class="group block bg-white rounded-2xl border border-slate-200 p-5 hover:border-red-300 hover:shadow-md hover:shadow-red-100 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-red-50 text-red-700 flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+        </div>
+        <span class="text-xs font-mono tabular-nums px-2 py-0.5 rounded-full {% if kpis.vencidos %}bg-red-50 text-red-700{% else %}bg-slate-100 text-slate-500{% endif %} font-semibold">
+          {{ kpis.vencidos }}
+        </span>
+      </div>
+      <h3 class="font-bold text-slate-900">Libros no devueltos</h3>
+      <p class="text-xs text-slate-500 mt-1">Control de retrasos con contacto y días vencidos.</p>
+    </a>
+
+    <a href="{% url 'prestamos:lista' %}"
+       class="group block bg-gradient-to-br from-marca-600 to-marca-800 rounded-2xl border border-marca-700 p-5 text-white hover:shadow-lg hover:shadow-marca-500/30 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-white/20 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+        </div>
+        <svg class="w-4 h-4 text-white/70" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+      <h3 class="font-bold">Ver todos los préstamos</h3>
+      <p class="text-xs text-marca-100 mt-1">Vista operativa con búsqueda y devolución.</p>
+    </a>
+
+  </section>
+</div>
+{% endblock %}

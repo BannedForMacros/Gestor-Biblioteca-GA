@@ -300,3 +300,75 @@ def recibo(request, prestamo_id):
         pk=prestamo_id,
     )
     return render(request, "prestamos/recibo.html", {"prestamo": prestamo})
+
+
+# ============================================================
+#  MODO ESCÁNER DE DEVOLUCIÓN
+# ============================================================
+
+@login_required
+def devolver_escaner(request):
+    """Vista dedicada para devolución rápida con lector de código de barras."""
+    return render(request, "prestamos/devolver_escaner.html")
+
+
+@login_required
+@require_POST
+def devolver_por_codigo(request):
+    """HTMX: recibe un código de ejemplar y devuelve el préstamo activo asociado."""
+    codigo = (request.POST.get("codigo") or "").strip()
+    if not codigo:
+        return render(request, "prestamos/partials/devolucion_resultado.html", {
+            "ok": False,
+            "titulo": "Código vacío",
+            "mensaje": "Escanee o escriba un código de ejemplar.",
+        })
+
+    ejemplar = (
+        Ejemplar.objects.select_related("libro", "libro__categoria")
+        .filter(codigo__iexact=codigo)
+        .first()
+    )
+    if not ejemplar:
+        return render(request, "prestamos/partials/devolucion_resultado.html", {
+            "ok": False,
+            "codigo": codigo,
+            "titulo": "Ejemplar no encontrado",
+            "mensaje": (
+                f"El código «{codigo}» no corresponde a ningún ejemplar registrado."
+            ),
+        })
+
+    prestamo = (
+        Prestamo.objects.select_related("usuario", "ejemplar__libro")
+        .filter(ejemplar=ejemplar, estado=Prestamo.Estado.ACTIVO)
+        .first()
+    )
+    if not prestamo:
+        return render(request, "prestamos/partials/devolucion_resultado.html", {
+            "ok": False,
+            "ejemplar": ejemplar,
+            "titulo": "Sin préstamo activo",
+            "mensaje": (
+                f"«{ejemplar.libro.titulo}» no está actualmente prestado. "
+                f"Estado: {ejemplar.get_estado_display()}."
+            ),
+        })
+
+    with transaction.atomic():
+        prestamo.estado = Prestamo.Estado.DEVUELTO
+        prestamo.fecha_devolucion_real = timezone.now()
+        prestamo.save(update_fields=["estado", "fecha_devolucion_real"])
+        ejemplar.estado = Ejemplar.Estado.DISPONIBLE
+        ejemplar.save(update_fields=["estado"])
+
+    return render(request, "prestamos/partials/devolucion_resultado.html", {
+        "ok": True,
+        "ejemplar": ejemplar,
+        "prestamo": prestamo,
+        "titulo": "Devolución registrada",
+        "mensaje": (
+            f"«{ejemplar.libro.titulo}» — devuelto por "
+            f"{prestamo.usuario.nombre_completo}."
+        ),
+    })

@@ -8,6 +8,10 @@ urlpatterns = [
     path("nuevo/", views.nuevo, name="nuevo"),
     path("<int:prestamo_id>/devolver/", views.devolver, name="devolver"),
 
+    # Modo escáner de devolución
+    path("escaner/", views.devolver_escaner, name="devolver_escaner"),
+    path("escaner/devolver/", views.devolver_por_codigo, name="devolver_por_codigo"),
+
     # Combobox de ejemplar
     path("ej/opciones/", views.opciones_ejemplar, name="opciones_ejemplar"),
     path("ej/seleccionar/", views.seleccionar_ejemplar, name="seleccionar_ejemplar"),

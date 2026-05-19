@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Devolución por escáner · Gestor Biblioteca{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+
+  <!-- ============ HEADER ============ -->
+  <header class="anim-entrada mb-7">
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="{% url 'home' %}" class="hover:text-marca-700 transition-colors">Inicio</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <a href="{% url 'prestamos:lista' %}" class="hover:text-marca-700 transition-colors">Préstamos</a>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <span class="text-slate-700 font-medium">Devolución por escáner</span>
+    </nav>
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+      <div>
+        <p class="text-sm font-semibold text-marca-600 uppercase tracking-wider mb-1">Modo escáner</p>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Devolución rápida</h1>
+        <p class="text-sm text-slate-500 mt-1">Dispare el lector. Cada código devuelve automáticamente el libro y deja el campo listo para el siguiente.</p>
+      </div>
+      <a href="{% url 'prestamos:lista' %}" class="text-xs font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1">
+        ← Devolución manual
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ INPUT GIGANTE ============ -->
+  <section class="anim-entrada-1 bg-gradient-to-br from-acento-50 to-acento-100/60 border-2 border-acento-200 rounded-3xl p-6 sm:p-8 mb-6 relative overflow-hidden">
+    <!-- Decoración -->
+    <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full bg-acento-200/40 blur-2xl"></div>
+
+    <div class="relative">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-acento-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-acento-600"></span>
+        </span>
+        <span class="text-sm font-bold text-acento-800 uppercase tracking-wider">Listo para escanear</span>
+        <span id="escaner-trabajando" class="hidden text-sm font-semibold text-marca-700 ml-2 inline-flex items-center gap-2">
+          <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          Procesando…
+        </span>
+      </div>
+
+      <form id="form-escaner"
+            hx-post="{% url 'prestamos:devolver_por_codigo' %}"
+            hx-target="#resultado-escaner"
+            hx-swap="innerHTML"
+            hx-indicator="#escaner-trabajando"
+            hx-on::before-request="document.getElementById('btn-codigo').disabled = true"
+            hx-on::after-request="document.getElementById('btn-codigo').disabled = false; document.getElementById('input-codigo').value=''; document.getElementById('input-codigo').focus();">
+        {% csrf_token %}
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none text-acento-500">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5C19.746 3.75 20.25 4.254 20.25 4.875v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/>
+            </svg>
+          </span>
+          <input type="text"
+                 id="input-codigo"
+                 name="codigo"
+                 autocomplete="off"
+                 spellcheck="false"
+                 autofocus
+                 placeholder="Escanee el código del libro o escríbalo y pulse Enter…"
+                 class="w-full text-2xl sm:text-3xl font-mono pl-16 pr-32 py-5 rounded-2xl border-2 border-acento-300 bg-white shadow-lg focus:border-acento-500 focus:ring-4 focus:ring-acento-200/60 focus:outline-none transition-all placeholder:text-slate-300 placeholder:text-base placeholder:font-sans">
+          <button type="submit"
+                  id="btn-codigo"
+                  class="absolute inset-y-2 right-2 px-5 rounded-xl bg-acento-600 text-white font-bold hover:bg-acento-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed">
+            Devolver
+          </button>
+        </div>
+      </form>
+
+      <p class="text-xs text-acento-800/80 mt-3 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+        Mantenga este campo enfocado. El lector de barras dispara Enter automáticamente al final del código.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ RESULTADO ÚLTIMO ============ -->
+  <section id="resultado-escaner" class="mb-6 min-h-[100px]">
+    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-400">
+      <svg class="mx-auto w-10 h-10 mb-2 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      <p class="text-sm font-semibold">Aún no se ha registrado ninguna devolución en esta sesión.</p>
+      <p class="text-xs text-slate-400 mt-1">Apunte al código de barras y dispare el lector.</p>
+    </div>
+  </section>
+
+  <!-- ============ HISTORIAL DE LA SESIÓN ============ -->
+  <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden"
+           x-data="{historial: [], total: 0}"
+           @escaner-resultado.window="
+             total++;
+             if ($event.detail.ok) {
+               historial.unshift($event.detail);
+               if (historial.length > 20) historial.pop();
+             }">
+    <header class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-slate-900 text-sm">Devoluciones de esta sesión</h2>
+        <p class="text-xs text-slate-500 mt-0.5">
+          <span x-text="historial.length"></span> devuelto<span x-text="historial.length === 1 ? '' : 's'"></span>
+          · <span x-text="total"></span> escaneo<span x-text="total === 1 ? '' : 's'"></span> en total
+        </p>
+      </div>
+      <a href="{% url 'prestamos:lista' %}?estado=DEVUELTO" class="text-xs font-semibold text-marca-700 hover:text-marca-900">Ver todos →</a>
+    </header>
+    <template x-if="historial.length === 0">
+      <div class="px-5 py-10 text-center">
+        <p class="text-sm text-slate-400">El historial de devoluciones de esta sesión aparecerá aquí.</p>
+      </div>
+    </template>
+    <template x-if="historial.length > 0">
+      <ul class="divide-y divide-slate-100">
+        <template x-for="item in historial" :key="item.codigo + '-' + item.hora">
+          <li class="px-5 py-3 flex items-center gap-3 hover:bg-slate-50/60 transition-colors">
+            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-acento-50 text-acento-700 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-slate-900 line-clamp-1" x-text="item.libro"></p>
+              <p class="text-xs text-slate-500 mt-0.5">
+                <span class="font-mono" x-text="item.codigo"></span>
+                <template x-if="item.persona"><span> · devuelto por <span x-text="item.persona"></span></span></template>
+              </p>
+            </div>
+            <span class="text-xs text-slate-400 tabular-nums" x-text="item.hora"></span>
+          </li>
+        </template>
+      </ul>
+    </template>
+  </section>
+
+</div>
+
+<!-- ============ AUDIO + EVENTOS GLOBALES ============ -->
+<script>
+  (function () {
+    // Pequeño beep con WebAudio: 800Hz éxito, 240Hz error
+    let ctx = null;
+    function ensureCtx() {
+      if (!ctx) {
+        try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch (e) { ctx = false; }
+      }
+      return ctx;
+    }
+    function beep(freq, ms) {
+      const c = ensureCtx();
+      if (!c) return;
+      try {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        g.gain.value = 0.08;
+        o.connect(g); g.connect(c.destination);
+        o.start();
+        setTimeout(() => { o.stop(); }, ms);
+      } catch (e) { /* silent */ }
+    }
+
+    // Llamado por el partial devuelto. Lee data-* y dispara evento + sonido.
+    window.escanerNotificar = function (el) {
+      const ok = el.dataset.ok === '1';
+      ok ? beep(880, 110) : beep(220, 220);
+      window.dispatchEvent(new CustomEvent('escaner-resultado', {
+        detail: {
+          ok: ok,
+          titulo: el.dataset.titulo || '',
+          libro: el.dataset.libro || el.dataset.codigo || '(desconocido)',
+          codigo: el.dataset.codigo || '',
+          persona: el.dataset.persona || '',
+          hora: new Date().toLocaleTimeString('es-PE', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+          }),
+        }
+      }));
+    };
+
+    // Re-focus al input cuando el usuario hace click fuera (defensa contra perder foco)
+    document.addEventListener('click', function (ev) {
+      const target = ev.target;
+      if (target.closest('a, button, input, select, textarea')) return;
+      const input = document.getElementById('input-codigo');
+      if (input) input.focus();
+    });
+  })();
+</script>
+{% endblock %}

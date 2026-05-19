@@ -10,7 +10,20 @@
       "PowerShell(& \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\pip.exe\" install -r \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\requirements.txt\" --quiet 2>&1 | Select-Object -Last 10)",
       "PowerShell(& \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import django, psycopg, openpyxl, pandas, decouple, django_htmx; print\\('Django', django.get_version\\(\\)\\); print\\('psycopg', psycopg.__version__\\); print\\('pandas', pandas.__version__\\); print\\('OK'\\)\")",
       "PowerShell(New-Item *)",
-      "PowerShell(Test-Path *)"
+      "PowerShell(Test-Path *)",
+      "Bash(python manage.py check)",
+      "Bash(.venv/Scripts/python.exe manage.py check)",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(ALLOWED_HOSTS=testserver,127.0.0.1,localhost .venv/Scripts/python.exe -c ' *)",
+      "PowerShell(python manage.py makemigrations alertas)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py makemigrations alertas)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py migrate alertas)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py generar_alertas)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py check)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -c \"import django; django.setup\\(\\); from apps.prestamos.models import Prestamo; from django.utils import timezone; hoy = timezone.now\\(\\).date\\(\\); print\\('Activos:', Prestamo.objects.filter\\(estado='ACTIVO'\\).count\\(\\)\\); print\\('Vencidos \\(activos con fecha < hoy\\):', Prestamo.objects.filter\\(estado='ACTIVO', fecha_devolucion_esperada__lt=hoy\\).count\\(\\)\\); from datetime import timedelta; print\\('Por vencer \\(<= 2 dias\\):', Prestamo.objects.filter\\(estado='ACTIVO', fecha_devolucion_esperada__gte=hoy, fecha_devolucion_esperada__lte=hoy+timedelta\\(days=2\\)\\).count\\(\\)\\)\" 2>&1)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py shell -c \"from apps.prestamos.models import Prestamo; from django.utils import timezone; from datetime import timedelta; hoy = timezone.now\\(\\).date\\(\\); print\\('Total prestamos:', Prestamo.objects.count\\(\\)\\); print\\('Activos:', Prestamo.objects.filter\\(estado='ACTIVO'\\).count\\(\\)\\); print\\('Vencidos:', Prestamo.objects.filter\\(estado='ACTIVO', fecha_devolucion_esperada__lt=hoy\\).count\\(\\)\\); print\\('Por vencer \\(<=2d\\):', Prestamo.objects.filter\\(estado='ACTIVO', fecha_devolucion_esperada__gte=hoy, fecha_devolucion_esperada__lte=hoy+timedelta\\(days=2\\)\\).count\\(\\)\\); [print\\(' -', p.id, p.fecha_devolucion_esperada, p.estado, p.ejemplar.codigo\\) for p in Prestamo.objects.all\\(\\)[:10]]\")",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py shell -c \"from apps.prestamos.models import Prestamo; from django.utils import timezone; from datetime import timedelta; p = Prestamo.objects.get\\(pk=1\\); print\\('Fecha original:', p.fecha_devolucion_esperada\\); p.fecha_devolucion_esperada = timezone.now\\(\\).date\\(\\) - timedelta\\(days=3\\); p.save\\(update_fields=['fecha_devolucion_esperada']\\); print\\('Nueva fecha:', p.fecha_devolucion_esperada\\)\")",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe manage.py shell -c \"from apps.alertas.models import Alerta; print\\('Total alertas:', Alerta.objects.count\\(\\)\\); print\\('No leidas:', Alerta.objects.filter\\(leida=False\\).count\\(\\)\\); [print\\(' -', a.nivel, '|', a.titulo, '|', a.mensaje[:80]\\) for a in Alerta.objects.all\\(\\)]\")"
     ]
   }
 }

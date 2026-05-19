@@ -106,6 +106,7 @@ def ejemplares_lista(request):
     estado = request.GET.get("estado") or ""
     condicion = request.GET.get("condicion") or ""
     libro_id = request.GET.get("libro") or ""
+    categoria_id = request.GET.get("categoria") or ""
 
     ejemplares = Ejemplar.objects.select_related("libro", "libro__categoria").order_by("codigo")
 
@@ -122,6 +123,8 @@ def ejemplares_lista(request):
         ejemplares = ejemplares.filter(condicion=condicion)
     if libro_id:
         ejemplares = ejemplares.filter(libro_id=libro_id)
+    if categoria_id:
+        ejemplares = ejemplares.filter(libro__categoria_id=categoria_id)
 
     paginator = Paginator(ejemplares, 25)
     page = paginator.get_page(request.GET.get("page"))
@@ -132,8 +135,10 @@ def ejemplares_lista(request):
         "estado": estado,
         "condicion": condicion,
         "libro_id": libro_id,
+        "categoria_id": categoria_id,
         "estados": Ejemplar.Estado.choices,
         "condiciones": Ejemplar.Condicion.choices,
+        "categorias": Categoria.objects.order_by("nombre"),
         "total": paginator.count,
     })
 

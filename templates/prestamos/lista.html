@@ -17,11 +17,18 @@
         <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Préstamos</h1>
         <p class="text-sm text-slate-500 mt-1">Gestión y seguimiento de libros prestados.</p>
       </div>
-      <a href="{% url 'prestamos:nuevo' %}"
-         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-marca-600 to-marca-700 text-white text-sm font-semibold hover:from-marca-700 hover:to-marca-800 shadow-md hover:shadow-lg hover:shadow-marca-500/30 transition-all">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-        Nuevo préstamo
-      </a>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'prestamos:devolver_escaner' %}"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-acento-200 text-acento-800 text-sm font-semibold hover:bg-acento-50 hover:border-acento-300 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5C19.746 3.75 20.25 4.254 20.25 4.875v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/></svg>
+          Modo escáner
+        </a>
+        <a href="{% url 'prestamos:nuevo' %}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-marca-600 to-marca-700 text-white text-sm font-semibold hover:from-marca-700 hover:to-marca-800 shadow-md hover:shadow-lg hover:shadow-marca-500/30 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Nuevo préstamo
+        </a>
+      </div>
     </div>
   </header>
 

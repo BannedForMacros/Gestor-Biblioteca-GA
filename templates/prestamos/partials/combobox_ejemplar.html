@@ -8,8 +8,22 @@
     const r = document.getElementById('resumen-libro');
     if (r) r.innerHTML = '<p class="text-sm text-slate-400 italic">Aún no seleccionado</p>';
     document.body.dispatchEvent(new Event('change'));
+    // Autofocus al input para que el lector dispare sin clicks
+    setTimeout(function() {
+      const i = document.getElementById('busqueda_ejemplar');
+      if (i) i.focus();
+    }, 50);
   })();
 </script>
+
+  <!-- Indicador "Listo para escanear" -->
+  <div class="flex items-center gap-2 mb-3">
+    <span class="relative flex h-2.5 w-2.5">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-acento-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-acento-600"></span>
+    </span>
+    <span class="text-xs font-bold text-acento-700 uppercase tracking-wider">Listo para escanear</span>
+  </div>
 
   <div class="relative">
     <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
