@@ -1,7 +1,9 @@
 """
 Django settings for Gestor Biblioteca FACEAC.
 """
-
+"""
+Prueba de settings
+"""
 from pathlib import Path
 from decouple import config, Csv
 
