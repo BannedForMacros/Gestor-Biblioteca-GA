@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .forms import CategoriaForm, EjemplarForm, LibroForm
-from .models import Categoria, Ejemplar, Libro
+from .forms import CapituloForm, CategoriaForm, EjemplarForm, LibroForm
+from .models import Capitulo, Categoria, Ejemplar, Libro
 
 
 # ============================================================
@@ -54,7 +54,7 @@ def libros_lista(request):
 @login_required
 def libro_detalle(request, pk):
     libro = get_object_or_404(
-        Libro.objects.select_related("categoria").prefetch_related("ejemplares"),
+        Libro.objects.select_related("categoria").prefetch_related("ejemplares", "capitulos"),
         pk=pk,
     )
     return render(request, "catalogo/libro_detalle.html", {"libro": libro})
@@ -238,3 +238,48 @@ def categoria_eliminar(request, pk):
     except ProtectedError:
         messages.error(request, "No se puede eliminar: la categoría tiene libros asociados.")
     return redirect("catalogo:categorias_lista")
+
+
+# ============================================================
+#  CAPÍTULOS
+# ============================================================
+
+@login_required
+def capitulo_form(request, libro_pk, pk=None):
+    libro = get_object_or_404(Libro, pk=libro_pk)
+    capitulo = get_object_or_404(Capitulo, pk=pk, libro=libro) if pk else None
+
+    if request.method == "POST":
+        form = CapituloForm(request.POST, instance=capitulo)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.libro = libro
+            obj.save()
+            messages.success(
+                request,
+                f"Capítulo «{obj.titulo[:60]}» {'actualizado' if capitulo else 'agregado'} correctamente.",
+            )
+            return redirect("catalogo:libro_detalle", pk=libro.pk)
+    else:
+        initial = {}
+        if not capitulo:
+            max_orden = libro.capitulos.order_by("-orden").values_list("orden", flat=True).first()
+            initial["orden"] = (max_orden or 0) + 1
+        form = CapituloForm(instance=capitulo, initial=initial)
+
+    return render(request, "catalogo/capitulo_form.html", {
+        "form": form,
+        "libro": libro,
+        "capitulo": capitulo,
+        "es_edicion": capitulo is not None,
+    })
+
+
+@login_required
+@require_POST
+def capitulo_eliminar(request, libro_pk, pk):
+    capitulo = get_object_or_404(Capitulo, pk=pk, libro_id=libro_pk)
+    titulo = capitulo.titulo
+    capitulo.delete()
+    messages.success(request, f"Capítulo «{titulo[:60]}» eliminado.")
+    return redirect("catalogo:libro_detalle", pk=libro_pk)

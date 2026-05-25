@@ -17,6 +17,11 @@ urlpatterns = [
     path("ejemplares/<int:pk>/editar/", views.ejemplar_form, name="ejemplar_editar"),
     path("ejemplares/<int:pk>/eliminar/", views.ejemplar_eliminar, name="ejemplar_eliminar"),
 
+    # ---- Capítulos ----
+    path("libros/<int:libro_pk>/capitulos/nuevo/", views.capitulo_form, name="capitulo_nuevo"),
+    path("libros/<int:libro_pk>/capitulos/<int:pk>/editar/", views.capitulo_form, name="capitulo_editar"),
+    path("libros/<int:libro_pk>/capitulos/<int:pk>/eliminar/", views.capitulo_eliminar, name="capitulo_eliminar"),
+
     # ---- Categorías ----
     path("categorias/", views.categorias_lista, name="categorias_lista"),
     path("categorias/nuevo/", views.categoria_form, name="categoria_nueva"),
