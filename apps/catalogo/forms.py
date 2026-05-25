@@ -1,5 +1,5 @@
 from django import forms
-from .models import Libro, Ejemplar, Categoria
+from .models import Libro, Ejemplar, Categoria, Capitulo
 
 
 BASE_INPUT = (
@@ -50,4 +50,14 @@ class CategoriaForm(forms.ModelForm):
         widgets = {
             "nombre": forms.TextInput(attrs={"class": BASE_INPUT, "placeholder": "Ej: Economía"}),
             "codigo_corto": forms.TextInput(attrs={"class": BASE_INPUT, "placeholder": "Ej: ECON"}),
+        }
+
+
+class CapituloForm(forms.ModelForm):
+    class Meta:
+        model = Capitulo
+        fields = ["orden", "titulo"]
+        widgets = {
+            "orden": forms.NumberInput(attrs={"class": BASE_INPUT, "placeholder": "Ej: 1", "min": 1}),
+            "titulo": forms.TextInput(attrs={"class": BASE_INPUT, "placeholder": "Ej: Introducción a la Macroeconomía"}),
         }

@@ -28,7 +28,13 @@
       "Bash(Select-Object Name, Mode)",
       "Bash(.venv\\\\Scripts\\\\python.exe *)",
       "PowerShell(.venv\\\\Scripts\\\\python.exe manage.py check --no-color)",
-      "PowerShell(.venv\\\\Scripts\\\\python.exe -c \"import django; import os; os.environ['DJANGO_SETTINGS_MODULE']='config.settings'; django.setup\\(\\); from django.urls import reverse; print\\(reverse\\('reportes:entregas_desfase'\\)\\)\")"
+      "PowerShell(.venv\\\\Scripts\\\\python.exe -c \"import django; import os; os.environ['DJANGO_SETTINGS_MODULE']='config.settings'; django.setup\\(\\); from django.urls import reverse; print\\(reverse\\('reportes:entregas_desfase'\\)\\)\")",
+      "PowerShell(.venv\\\\Scripts\\\\python.exe -c \"import django,os;os.environ['DJANGO_SETTINGS_MODULE']='config.settings';django.setup\\(\\);from django.contrib.auth.models import User;[print\\(f'  username: {u.username}, email: {u.email}, is_superuser: {u.is_superuser}, is_active: {u.is_active}'\\) for u in User.objects.all\\(\\)]\")",
+      "PowerShell(.venv\\\\Scripts\\\\python.exe -c \"import django,os;os.environ['DJANGO_SETTINGS_MODULE']='config.settings';django.setup\\(\\);from django.contrib.auth.models import User;u=User.objects.get\\(username='cesar'\\);u.set_password\\('123456'\\);u.save\\(\\);print\\('Password actualizado correctamente'\\)\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\MacSoft\\\\RENACYT\\\\Bilioteca\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(head *)",
+      "PowerShell(.venv\\\\Scripts\\\\python.exe -c \"import django,os;os.environ['DJANGO_SETTINGS_MODULE']='config.settings';django.setup\\(\\);from apps.catalogo.models import Capitulo,Libro;print\\(f'Capitulos: {Capitulo.objects.count\\(\\)}'\\);print\\(f'Libros: {Libro.objects.count\\(\\)}'\\);print\\(f'Libros con capitulos: {Libro.objects.filter\\(capitulos__isnull=False\\).distinct\\(\\).count\\(\\)}'\\);caps=Capitulo.objects.select_related\\('libro'\\)[:10];[print\\(f'  [{c.orden}] {c.titulo[:80]} -> {c.libro.titulo[:50]}'\\) for c in caps]\")"
     ]
   }
 }
