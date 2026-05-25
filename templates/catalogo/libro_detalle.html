@@ -149,9 +149,7 @@
       <ul class="divide-y divide-slate-100">
         {% for cap in libro.capitulos.all %}
           <li class="px-6 py-2.5 flex items-center gap-4 hover:bg-slate-50/60 transition-colors group">
-            <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-marca-50 text-marca-700 flex items-center justify-center font-bold text-xs tabular-nums">
-              {{ cap.orden }}
-            </span>
+            <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-marca-400"></span>
             <p class="flex-1 min-w-0 text-sm text-slate-800 line-clamp-1">{{ cap.titulo }}</p>
             <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
               <a href="{% url 'catalogo:capitulo_editar' libro.id cap.id %}"
