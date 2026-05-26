@@ -101,6 +101,18 @@
       <p class="text-xs text-slate-500 mt-1">Control de retrasos con contacto y días vencidos.</p>
     </a>
 
+    <a href="{% url 'reportes:entregas_desfase' %}"
+       class="group block bg-white rounded-2xl border border-slate-200 p-5 hover:border-amber-300 hover:shadow-md hover:shadow-amber-100 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </div>
+        <svg class="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      </div>
+      <h3 class="font-bold text-slate-900">Entregas en desfase</h3>
+      <p class="text-xs text-slate-500 mt-1">Historial de devoluciones fuera de plazo y pendientes vencidos.</p>
+    </a>
+
     <a href="{% url 'prestamos:lista' %}"
        class="group block bg-gradient-to-br from-marca-600 to-marca-800 rounded-2xl border border-marca-700 p-5 text-white hover:shadow-lg hover:shadow-marca-500/30 transition-all">
       <div class="flex items-start justify-between mb-4">

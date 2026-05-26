@@ -2,7 +2,8 @@ import csv
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, F, Q, Sum
+from django.db.models import Count, ExpressionWrapper, F, Q, Sum
+from django.db.models.fields import DurationField
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -457,4 +458,91 @@ def no_devueltos(request):
         "prestamos": base,
         "hoy": hoy,
         "total": base.count(),
+    })
+
+
+# ============================================================
+#  6. HISTORIAL DE ENTREGAS EN DESFASE
+# ============================================================
+
+@login_required
+def entregas_desfase(request):
+    desde, hasta = _parse_rango(request, dias_default=90)
+    hoy = timezone.now().date()
+    filtro = request.GET.get("filtro", "todos")
+
+    devueltos_tarde = Q(
+        estado=Prestamo.Estado.DEVUELTO,
+        fecha_devolucion_real__date__gt=F("fecha_devolucion_esperada"),
+        fecha_prestamo__date__gte=desde,
+        fecha_prestamo__date__lte=hasta,
+    )
+    activos_vencidos = Q(
+        estado=Prestamo.Estado.ACTIVO,
+        fecha_devolucion_esperada__lt=hoy,
+        fecha_prestamo__date__gte=desde,
+        fecha_prestamo__date__lte=hasta,
+    )
+
+    if filtro == "devueltos":
+        q = devueltos_tarde
+    elif filtro == "pendientes":
+        q = activos_vencidos
+    else:
+        q = devueltos_tarde | activos_vencidos
+
+    base = (
+        Prestamo.objects.filter(q)
+        .select_related("ejemplar__libro", "ejemplar__libro__categoria", "usuario")
+        .order_by("-fecha_prestamo")
+    )
+
+    total = base.count()
+    n_devueltos_tarde = Prestamo.objects.filter(devueltos_tarde).count()
+    n_pendientes = Prestamo.objects.filter(activos_vencidos).count()
+
+    def _dias_desfase(p):
+        if p.estado == Prestamo.Estado.DEVUELTO and p.fecha_devolucion_real:
+            return (p.fecha_devolucion_real.date() - p.fecha_devolucion_esperada).days
+        if p.estado == Prestamo.Estado.ACTIVO:
+            return (hoy - p.fecha_devolucion_esperada).days
+        return 0
+
+    prestamos_con_desfase = []
+    for p in base:
+        p.dias_desfase = _dias_desfase(p)
+        prestamos_con_desfase.append(p)
+
+    if request.GET.get("export") == "csv":
+        rows = []
+        for p in prestamos_con_desfase:
+            rows.append((
+                p.ejemplar.codigo,
+                p.ejemplar.libro.titulo,
+                p.usuario.codigo_universitario,
+                p.usuario.nombre_completo,
+                p.usuario.escuela,
+                p.fecha_prestamo.strftime("%Y-%m-%d"),
+                p.fecha_devolucion_esperada.strftime("%Y-%m-%d"),
+                p.fecha_devolucion_real.strftime("%Y-%m-%d %H:%M") if p.fecha_devolucion_real else "Pendiente",
+                p.dias_desfase,
+                p.get_estado_display(),
+            ))
+        return _csv_response(
+            f"entregas_desfase_{desde}_{hasta}.csv",
+            ["Código ejemplar", "Título", "Código persona", "Persona", "Escuela",
+             "Fecha préstamo", "Devolución esperada", "Devolución real",
+             "Días de desfase", "Estado"],
+            rows,
+        )
+
+    return render(request, "reportes/entregas_desfase.html", {
+        "prestamos": prestamos_con_desfase,
+        "desde": desde,
+        "hasta": hasta,
+        "total": total,
+        "n_devueltos_tarde": n_devueltos_tarde,
+        "n_pendientes": n_pendientes,
+        "filtro": filtro,
+        "hoy": hoy,
     })
